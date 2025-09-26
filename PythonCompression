@@ -1,0 +1,73 @@
+import time
+import lzma
+import gzip
+import bz2
+
+# Create sample data - repeated string to demonstrate compression effectiveness
+data = b'This is some sample data' * 999000
+
+print('Original data size:', len(data))
+print()
+
+# LZMA Compression
+print("=== LZMA Compression ===")
+start = time.time()
+compressed_data_lzma = lzma.compress(data)
+end = time.time()
+
+print(f"LZMA compression time: {end - start:.4f} seconds")
+print(f"LZMA compressed size: {len(compressed_data_lzma)} bytes")
+print(f"LZMA compression ratio: {len(data) / len(compressed_data_lzma):.2f}:1")
+print(f"LZMA space saved: {((len(data) - len(compressed_data_lzma)) / len(data)) * 100:.2f}%")
+print()
+
+# GZIP Compression
+print("=== GZIP Compression ===")
+start = time.time()
+compressed_data_gzip = gzip.compress(data)
+end = time.time()
+
+print(f"GZIP compression time: {end - start:.4f} seconds")
+print(f"GZIP compressed size: {len(compressed_data_gzip)} bytes")
+print(f"GZIP compression ratio: {len(data) / len(compressed_data_gzip):.2f}:1")
+print(f"GZIP space saved: {((len(data) - len(compressed_data_gzip)) / len(data)) * 100:.2f}%")
+print()
+
+# BZ2 Compression
+print("=== BZ2 Compression ===")
+start = time.time()
+compressed_data_bz2 = bz2.compress(data)
+end = time.time()
+
+print(f"BZ2 compression time: {end - start:.4f} seconds")
+print(f"BZ2 compressed size: {len(compressed_data_bz2)} bytes")
+print(f"BZ2 compression ratio: {len(data) / len(compressed_data_bz2):.2f}:1")
+print(f"BZ2 space saved: {((len(data) - len(compressed_data_bz2)) / len(data)) * 100:.2f}%")
+print()
+
+# Decompression test to verify data integrity
+print("=== Decompression Verification ===")
+decompressed_lzma = lzma.decompress(compressed_data_lzma)
+decompressed_gzip = gzip.decompress(compressed_data_gzip)
+decompressed_bz2 = bz2.decompress(compressed_data_bz2)
+
+print(f"LZMA decompression successful: {data == decompressed_lzma}")
+print(f"GZIP decompression successful: {data == decompressed_gzip}")
+print(f"BZ2 decompression successful: {data == decompressed_bz2}")
+print()
+
+# Summary comparison
+print("=== Compression Summary ===")
+algorithms = [
+    ("LZMA", len(compressed_data_lzma)),
+    ("GZIP", len(compressed_data_gzip)),
+    ("BZ2", len(compressed_data_bz2))
+]
+
+# Sort by compression size (best compression first)
+algorithms.sort(key=lambda x: x[1])
+
+print("Ranking by compression efficiency (smallest size):")
+for i, (name, size) in enumerate(algorithms, 1):
+    ratio = len(data) / size
+    print(f"{i}. {name}: {size} bytes (ratio: {ratio:.2f}:1)")
