@@ -1,3 +1,8 @@
 # See what files sizes you have 
 ls -lh GameAsset LargeDataset sample_files
 
+# Run on each specific file
+python3 script.py "GameAsset/<PUT_A_FILE_NAME_HERE>"
+python3 script.py "LargeDataset/<PUT_A_FILE_NAME_HERE>"
+python3 script.py "sample_files/<PUT_A_FILE_NAME_HERE>"
+
