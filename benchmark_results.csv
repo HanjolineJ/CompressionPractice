@@ -1,0 +1,6 @@
+algorithm,level,elapsed_s,output_bytes,ratio,throughput_MBps,output_path,exit_code
+gzip,6,0.22902354200050468,2494470,0.47578275740261644,21.831800091938653,/Users/hanjo/CompressionPractice/compressed_out/GameAsset.gz,0
+bzip2,6,0.2348908339990885,2300474,0.43878092863535206,21.286467846259754,/Users/hanjo/CompressionPractice/compressed_out/GameAsset.bz2,0
+xz,6,0.6298585000040475,462556,0.08822562273073023,7.938284845359083,/Users/hanjo/CompressionPractice/compressed_out/GameAsset.xz,0
+zstd,5,0.012937040999531746,490489,0.09355342373155497,386.48684699103205,/Users/hanjo/CompressionPractice/compressed_out/GameAsset.zst,0
+lz4,0,0.008583625000028405,4998172,0.9533263804064792,582.5040335855991,/Users/hanjo/CompressionPractice/compressed_out/GameAsset.lz4,0

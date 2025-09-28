@@ -1,0 +1,3 @@
+# See what files sizes you have 
+ls -lh GameAsset LargeDataset sample_files
+
