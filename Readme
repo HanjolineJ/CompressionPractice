@@ -1,3 +1,10 @@
+# Install native compressors, only once
+# macOS
+brew install gzip bzip2 xz zstd lz4
+
+# Ubuntu
+sudo apt-get install -y gzip bzip2 xz-utils zstd lz4
+
 # See what files sizes you have 
 ls -lh GameAsset LargeDataset sample_files
 
@@ -5,4 +12,21 @@ ls -lh GameAsset LargeDataset sample_files
 python3 script.py "GameAsset/<PUT_A_FILE_NAME_HERE>"
 python3 script.py "LargeDataset/<PUT_A_FILE_NAME_HERE>"
 python3 script.py "sample_files/<PUT_A_FILE_NAME_HERE>"
+
+# Run the benchmark
+python3 script.py /path/to/bigfile --outdir bench_out --csv results.csv --keep-best
+
+# 3A Run against a sample file 
+python3 script.py sample_files/sample1.bin --outdir bench_out --csv results.csv
+
+# 3B Run against a big game asset 
+python3 script.py GameAsset/YourBigAsset.pak --outdir bench_out --csv results.csv --keep-best
+
+# 3C Run against a large dataset 
+python3 script.py LargeDataset/YourLargeFile.dat --outdir bench_out --csv results.csv --keep-best
+
+python3 script.py LargeDataset/big.bin --algos zstd xz --level 19 --keep-best
+
+python3 script.py GameAsset/asset.bin --algos gzip bzip2 xz
+
 
