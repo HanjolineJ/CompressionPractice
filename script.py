@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
+"""
+Compressor Research Script
+Compresses GameAsset.txt, LargeDataset.txt, and sample_files.txt
+"""
 import gzip
 import os
 import time
 import psutil
 from pathlib import Path
 
-def compress_file(input_file):
-    """Compress a single file using gzip"""
-    output_file = f"{input_file}.gz"
+def compress_file(input_file, output_dir=".venv"):
+    """Compress a single file using gzip and save to .venv directory"""
+    # Create output directory if it doesn't exist
+    Path(output_dir).mkdir(exist_ok=True)
+    
+    # Set output file path to .venv directory
+    output_file = Path(output_dir) / f"{Path(input_file).name}.gz"
     
     try:
         with open(input_file, 'rb') as f_in:
             with gzip.open(output_file, 'wb') as f_out:
                 f_out.writelines(f_in)
-        return True, output_file
+        return True, str(output_file)
     except FileNotFoundError:
         return False, f"File not found: {input_file}"
     except Exception as e:
@@ -38,8 +46,6 @@ def main():
     # Files to compress
     files_to_compress = ['GameAsset.txt', 'LargeDataset.txt', 'sample_files.txt']
     
-    print("=" * 60)
-    print("TEXT FILE COMPRESSION UTILITY")
     print("=" * 60)
     
     # Get initial memory usage
@@ -76,7 +82,7 @@ def main():
             
             compression_ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
             
-            print(f"✅ Successfully compressed to: {compressed_file}")
+            print(f"✅ Successfully compressed to: .venv/{Path(compressed_file).name}")
             print(f"   Original size:    {format_bytes(original_size)}")
             print(f"   Compressed size:  {format_bytes(compressed_size)}")
             print(f"   Space saved:      {compression_ratio:.1f}%")
@@ -103,8 +109,9 @@ def main():
         print(f"Total compressed:    {format_bytes(total_compressed_size)}")
         print(f"Overall space saved: {overall_ratio:.1f}%")
     
-    print(f"Time taken:          {end_time - start_time:.2f} seconds")
-    print(f"Memory used:         {format_bytes(end_memory - start_memory)}")
+    print(f"Time taken:          {end_time - start_time:.3f} seconds")
+    print(f"Memory used:         {format_bytes(abs(end_memory - start_memory))}")
+    print(f"Compressed files:    Saved to .venv/ directory")
     print("=" * 60)
 
 if __name__ == "__main__":
