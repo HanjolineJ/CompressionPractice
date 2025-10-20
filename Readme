@@ -4,6 +4,9 @@ to establish a benchmark across algorithms. The project will evolve from simple 
 input compression to a secure, container-aware pipeline that can integrate 
 with Docker/Kubernetes for scalable deployment.
 
+
+# Setup Instructions to run the compression benchmark script
+
 # Install native compressors, only once
 # macOS
 brew install gzip bzip2 xz zstd lz4
@@ -20,3 +23,5 @@ ls -lh GameAsset.txt LargeDataset.txt sample_files.txt
 
 # Run script
 python script.py
+
+* Click on compression_action to see the launcher application
