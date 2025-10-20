@@ -1,3 +1,9 @@
+# Objective:
+The goal is to save storage on disks/servers while preserving fidelity, and 
+to establish a benchmark across algorithms. The project will evolve from simple file 
+input compression to a secure, container-aware pipeline that can integrate 
+with Docker/Kubernetes for scalable deployment.
+
 # Install native compressors, only once
 # macOS
 brew install gzip bzip2 xz zstd lz4
