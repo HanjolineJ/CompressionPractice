@@ -1,0 +1,2 @@
+tool,level,src_bytes,dst_bytes,ratio_saved,elapsed_ms,status
+gzip,6,1056768,498673,0.5281,24.724,ok

@@ -1,80 +1,56 @@
-import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { format } from '@fast-csv/format';
+import zlib from 'node:zlib';
 
-const TOOLS = {
-  gzip:  { cmd: 'gzip',  args: (lvl) => ['-k', `-${lvl}`] },
-  bzip2: { cmd: 'bzip2', args: (lvl) => ['-k', `-${Math.min(9, Math.max(1, lvl))}`] },
-  xz:    { cmd: 'xz',    args: (lvl) => ['-k', `-${lvl}`] },
-  zstd:  { cmd: 'zstd',  args: (lvl) => ['-k', `-${lvl}`] },
-  lz4:   { cmd: 'lz4',   args: (lvl) => ['-k', `-${lvl}`] }
-};
+// For now, implement a single-tool fallback that uses Node's gzip so the app
+// works on Windows without requiring external CLI tools. Keep return shape similar.
 
-function existsOnPath(cmd) {
-  const sep = process.platform === 'win32' ? ';' : ':';
-  const exts = process.platform === 'win32' ? process.env.PATHEXT?.split(';') ?? ['.exe', '.cmd'] : [''];
-  return (process.env.PATH || '').split(sep).some(dir =>
-    exts.some(ext => fs.existsSync(path.join(dir, cmd + ext)))
-  );
-}
-
-function runOne(tool, inputPath, level) {
+function gzipFile(inputPath, level) {
   return new Promise((resolve) => {
-    const t = TOOLS[tool];
-    if (!t || !existsOnPath(t.cmd)) return resolve({ tool, skipped: true, reason: 'not_installed' });
-
-    const args = [...t.args(level), inputPath];
     const start = process.hrtime.bigint();
-    const child = spawn(t.cmd, args, { stdio: 'ignore' });
+    const gzip = zlib.createGzip({ level });
+    const inStream = fs.createReadStream(inputPath);
+    const outPath = inputPath + '.gz';
+    const outStream = fs.createWriteStream(outPath);
 
-    child.on('close', (code) => {
+    inStream.pipe(gzip).pipe(outStream);
+
+    outStream.on('finish', () => {
       const end = process.hrtime.bigint();
-      if (code !== 0) return resolve({ tool, error: true, code });
-
-      const outPath = {
-        gzip:  inputPath + '.gz',
-        bzip2: inputPath + '.bz2',
-        xz:    inputPath + '.xz',
-        zstd:  inputPath + '.zst',
-        lz4:   inputPath + '.lz4'
-      }[tool];
-
       try {
         const srcSize = fs.statSync(inputPath).size;
         const dstSize = fs.statSync(outPath).size;
         const ratio = srcSize > 0 ? (1 - (dstSize / srcSize)) : 0;
         resolve({
-          tool, level, srcSize, dstSize, ratio,
-          elapsedNs: Number(end - start),
-          outPath
+          tool: 'gzip', level, srcSize, dstSize, ratio,
+          elapsedNs: Number(end - start), outPath
         });
       } catch (e) {
-        resolve({ tool, error: true, message: e.message });
+        resolve({ tool: 'gzip', error: true, message: e.message });
       }
     });
+
+    outStream.on('error', (e) => resolve({ tool: 'gzip', error: true, message: e.message }));
+    inStream.on('error', (e) => resolve({ tool: 'gzip', error: true, message: e.message }));
   });
 }
 
-export async function runCompressionJob({ inputPath, outputDir, tools, level }) {
+export async function runCompressionJob({ inputPath, outputDir, tools = ['gzip'], level = 6 }) {
   if (!fs.existsSync(inputPath)) throw new Error('Input file not found');
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-  // Work in output dir (keep originals in place; copy results after)
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'compressaction-'));
   const tempInput = path.join(tempDir, path.basename(inputPath));
   fs.copyFileSync(inputPath, tempInput);
 
-  const selected = tools.filter(t => TOOLS[t]);
   const results = [];
-  for (const t of selected) {
-    // cleanup any previous outputs
-    ['.gz','.bz2','.xz','.zst','.lz4'].forEach(ext => {
-      const p = tempInput + ext; if (fs.existsSync(p)) fs.unlinkSync(p);
-    });
-    // run tool
-    results.push(await runOne(t, tempInput, level));
+  // Use gzip only; if requested tools include gzip, run gzip, else skip others
+  if (tools.includes('gzip')) {
+    results.push(await gzipFile(tempInput, level));
+  } else {
+    // If gzip not requested, still perform gzip to produce a result but mark skipped
+    results.push({ tool: 'gzip', skipped: true, reason: 'gzip_not_selected' });
   }
 
   // Move artifacts to outputDir
@@ -85,29 +61,25 @@ export async function runCompressionJob({ inputPath, outputDir, tools, level }) 
     }
   }
 
-  // Write CSV log
+  // Write a simple CSV log without external libs
   const logsDir = path.join(process.cwd(), 'logs');
   if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
   const csvPath = path.join(logsDir, `run_${Date.now()}.csv`);
-  const csvStream = format({ headers: true });
-  const writable = fs.createWriteStream(csvPath);
-  csvStream.pipe(writable);
+  const headers = ['tool','level','src_bytes','dst_bytes','ratio_saved','elapsed_ms','status'];
+  const lines = [headers.join(',')];
   for (const r of results) {
-    csvStream.write({
-      tool: r.tool,
-      level: r.level ?? '',
-      src_bytes: r.srcSize ?? '',
-      dst_bytes: r.dstSize ?? '',
-      ratio_saved: r.ratio?.toFixed(4) ?? '',
-      elapsed_ms: r.elapsedNs ? (r.elapsedNs / 1e6).toFixed(3) : '',
-      status: r.error ? 'error' : (r.skipped ? 'skipped' : 'ok')
-    });
+    const line = [
+      r.tool,
+      r.level ?? '',
+      r.srcSize ?? '',
+      r.dstSize ?? '',
+      r.ratio != null ? r.ratio.toFixed(4) : '',
+      r.elapsedNs ? (r.elapsedNs / 1e6).toFixed(3) : '',
+      r.error ? 'error' : (r.skipped ? 'skipped' : 'ok')
+    ].map(v => String(v)).join(',');
+    lines.push(line);
   }
-  csvStream.end();
+  fs.writeFileSync(csvPath, lines.join('\n'));
 
-  // Return rows for UI
-  return {
-    rows: results,
-    csvPath
-  };
+  return { rows: results, csvPath };
 }

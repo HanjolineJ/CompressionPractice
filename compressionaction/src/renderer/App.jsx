@@ -58,7 +58,15 @@ export default function App() {
           <div style={{display:'grid', gridTemplateColumns:'1fr auto', gap:12, alignItems:'center'}}>
             <div>
               <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Input file</div>
-              <div style={{background:'#0f1318', borderRadius:10, padding:'10px 12px', border:'1px solid #1e2633'}}>{inputPath || '— not selected —'}</div>
+              <div
+                onDragOver={e=>{ e.preventDefault(); }}
+                onDrop={async e=>{
+                  e.preventDefault();
+                  const f = e.dataTransfer?.files?.[0];
+                  if (f) setInputPath(f.path || f.name);
+                }}
+                style={{background:'#0f1318', borderRadius:10, padding:'10px 12px', border:'1px solid #1e2633'}}
+              >{inputPath || '— not selected —'}</div>
             </div>
             <button onClick={pickInput} style={btn()}>Browse</button>
           </div>
