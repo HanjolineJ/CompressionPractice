@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function prettyBytes(n) {
   if (!n && n !== 0) return '';
@@ -16,17 +16,51 @@ export default function App() {
   const [rows, setRows] = useState([]);
   const [running, setRunning] = useState(false);
   const [csvPath, setCsvPath] = useState('');
+  const [dragOverInput, setDragOverInput] = useState(false);
+  const [dragOverOutput, setDragOverOutput] = useState(false);
+
+  useEffect(() => {
+    // Debug: Check if API is available
+    if (!window.compressAPI) {
+      console.error('compressAPI is not available on window object');
+    } else {
+      console.log('compressAPI is available:', Object.keys(window.compressAPI));
+    }
+  }, []);
 
   const toggleTool = (t) =>
     setTools(prev => prev.includes(t) ? prev.filter(x=>x!==t) : [...prev, t]);
 
   const pickInput = async () => {
-    const p = await window.compressAPI.pickInputFile();
-    if (p) setInputPath(p);
+    try {
+      if (!window.compressAPI) {
+        alert('Electron API not loaded. Please restart the application.');
+        return;
+      }
+      console.log('Calling pickInputFile...');
+      const p = await window.compressAPI.pickInputFile();
+      console.log('Result:', p);
+      if (p) setInputPath(p);
+    } catch (error) {
+      console.error('Error picking input file:', error);
+      alert('Error opening file dialog: ' + error.message);
+    }
   };
+  
   const pickOut = async () => {
-    const p = await window.compressAPI.pickOutputDir();
-    if (p) setOutputDir(p);
+    try {
+      if (!window.compressAPI) {
+        alert('Electron API not loaded. Please restart the application.');
+        return;
+      }
+      console.log('Calling pickOutputDir...');
+      const p = await window.compressAPI.pickOutputDir();
+      console.log('Result:', p);
+      if (p) setOutputDir(p);
+    } catch (error) {
+      console.error('Error picking output directory:', error);
+      alert('Error opening directory dialog: ' + error.message);
+    }
   };
 
   const run = async () => {
@@ -57,16 +91,40 @@ export default function App() {
           <h2 style={{fontSize:18, fontWeight:700, marginBottom:8}}>1) Choose File & Output</h2>
           <div style={{display:'grid', gridTemplateColumns:'1fr auto', gap:12, alignItems:'center'}}>
             <div>
-              <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Input file</div>
+              <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Input file (drag & drop or browse)</div>
               <div
-                onDragOver={e=>{ e.preventDefault(); }}
+                onDragOver={e=>{ 
+                  e.preventDefault(); 
+                  setDragOverInput(true);
+                }}
+                onDragLeave={e=>{ 
+                  e.preventDefault(); 
+                  setDragOverInput(false);
+                }}
                 onDrop={async e=>{
                   e.preventDefault();
-                  const f = e.dataTransfer?.files?.[0];
-                  if (f) setInputPath(f.path || f.name);
+                  setDragOverInput(false);
+                  const files = Array.from(e.dataTransfer?.files || []);
+                  if (files.length > 0) {
+                    const file = files[0];
+                    // In Electron, file.path is available directly
+                    if (file.path) {
+                      setInputPath(file.path);
+                    }
+                  }
                 }}
-                style={{background:'#0f1318', borderRadius:10, padding:'10px 12px', border:'1px solid #1e2633'}}
-              >{inputPath || '— not selected —'}</div>
+                style={{
+                  background: dragOverInput ? '#1a2534' : '#0f1318', 
+                  borderRadius:10, 
+                  padding:'10px 12px', 
+                  border: dragOverInput ? '2px dashed #4f8cff' : '1px solid #1e2633',
+                  transition: 'all 0.2s ease',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+              >{inputPath || '— Drag file here or click Browse —'}</div>
             </div>
             <button onClick={pickInput} style={btn()}>Browse</button>
           </div>
@@ -74,8 +132,44 @@ export default function App() {
           <div style={{height:10}}/>
           <div style={{display:'grid', gridTemplateColumns:'1fr auto', gap:12, alignItems:'center'}}>
             <div>
-              <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Output directory</div>
-              <div style={{background:'#0f1318', borderRadius:10, padding:'10px 12px', border:'1px solid #1e2633'}}>{outputDir || '— not selected —'}</div>
+              <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Output directory (drag & drop folder or choose)</div>
+              <div
+                onDragOver={e=>{ 
+                  e.preventDefault(); 
+                  setDragOverOutput(true);
+                }}
+                onDragLeave={e=>{ 
+                  e.preventDefault(); 
+                  setDragOverOutput(false);
+                }}
+                onDrop={async e=>{
+                  e.preventDefault();
+                  setDragOverOutput(false);
+                  const files = Array.from(e.dataTransfer?.files || []);
+                  if (files.length > 0) {
+                    const file = files[0];
+                    // For directories, check if path exists and use it
+                    if (file.path) {
+                      // If it's a file, get its directory
+                      const path = file.path;
+                      // Use the directory of the file if it's a file, otherwise use the path
+                      const dirPath = path.includes('.') ? path.substring(0, path.lastIndexOf('\\')) : path;
+                      setOutputDir(dirPath || path);
+                    }
+                  }
+                }}
+                style={{
+                  background: dragOverOutput ? '#1a2534' : '#0f1318', 
+                  borderRadius:10, 
+                  padding:'10px 12px', 
+                  border: dragOverOutput ? '2px dashed #4f8cff' : '1px solid #1e2633',
+                  transition: 'all 0.2s ease',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+              >{outputDir || '— Drag folder here or click Choose —'}</div>
             </div>
             <button onClick={pickOut} style={btn()}>Choose</button>
           </div>
@@ -147,20 +241,28 @@ export default function App() {
 function btn() {
   return {
     background:'#1c2433', color:'#e2e8f0', padding:'10px 14px', borderRadius:10,
-    border:'1px solid #2b3547', cursor:'pointer', fontWeight:600
+    border:'1px solid #2b3547', cursor:'pointer', fontWeight:600, fontSize: '14px'
   };
 }
 function btnPrimary(disabled) {
   return {
     background: disabled ? '#2b3547' : '#4f8cff',
-    color:'#0b0d10', padding:'12px 16px', borderRadius:12, border:'none',
-    cursor: disabled ? 'not-allowed' : 'pointer', fontWeight:800
+    color: disabled ? '#6b7280' : '#0b0d10', 
+    padding:'12px 16px', 
+    borderRadius:12, 
+    border:'none',
+    cursor: disabled ? 'not-allowed' : 'pointer', 
+    fontWeight:800,
+    fontSize: '15px',
+    transition: 'all 0.2s ease'
   };
 }
 function chip(on) {
   return {
     display:'inline-flex', alignItems:'center',
     background: on ? '#24324a' : '#18202d',
-    border:'1px solid #2b3547', padding:'8px 12px', borderRadius:999
+    border:'1px solid #2b3547', padding:'8px 12px', borderRadius:999,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
   };
 }
