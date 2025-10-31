@@ -17,6 +17,20 @@ npm run dev
 **Status:** Initial launcher code is committed but **does not run end-to-end** yet.  
 I’ll troubleshoot this **Oct 17–Oct 20** and push fixes.
 
+**Status:** Launcher code runs correctly  
+pushed fixes **Oct 31**
+
+## New Quick start terminal access Oct 31
+
+# From the project folder containing package.json
+cd path/to/CompressionPractice/compressionaction
+
+# Install deps
+npm install
+
+# Start Vite + Electron (opens the app window)
+npm run dev
+
 ## Quick start (developer)
 
 Requirements: Node.js and npm installed (Node 16+ recommended).
