@@ -1,0 +1,19 @@
+This is a test file for compression.
+It contains some repeating text to demonstrate compression effectiveness.
+
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Repeating text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+This pattern should compress well with all compression algorithms.
+The goal is to test that each tool can compress and decompress successfully,
+verifying data integrity through hash comparison.
+
+End of test file.
