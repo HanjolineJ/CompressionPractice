@@ -14,7 +14,7 @@ import crypto from 'node:crypto';
  */
 function generateGraphs(csvPath) {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), 'src', 'backend', 'graph_generator.py');
+    const scriptPath = path.join(process.cwd(), 'src', 'backend', 'comp_graph_generator.py');
     
     // Check if Python is available
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';

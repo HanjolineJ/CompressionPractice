@@ -173,6 +173,77 @@ async function testDecompression() {
 
   console.log(`All decompressed files are saved in: ${viewDecompDir}`);
   console.log('You can now open and inspect these files to verify they are usable.\n');
+
+  // Save results to file for graph generation
+  const resultsPath = path.join(baseDir, 'logs', `decomp_test_${Date.now()}.txt`);
+  const resultsContent = `=== DECOMPRESSION TEST RESULTS ===
+
+Original file: ${originalFile}
+Original hash: ${originalHash}
+
+${compressedFiles.map((file, idx) => {
+  const result = results[idx];
+  const compressedPath = path.join(outTestDir, file);
+  const extension = path.extname(file).slice(1);
+  const baseName = path.basename(file, path.extname(file));
+  const decompressedPath = path.join(viewDecompDir, `${baseName}_from_${extension}.txt`);
+  
+  let output = `Processing: ${file}\n`;
+  output += `  Tool: ${extension}\n`;
+  output += `  Compressed size: ${fs.existsSync(compressedPath) ? fs.statSync(compressedPath).size : 0} bytes\n`;
+  
+  if (result.success) {
+    const decompressedSize = fs.existsSync(decompressedPath) ? fs.statSync(decompressedPath).size : 0;
+    output += `  Decompressed to: ${path.basename(decompressedPath)}\n`;
+    output += `  Decompressed size: ${decompressedSize} bytes\n`;
+    output += `  Hash match: YES - USABLE\n`;
+  } else {
+    output += `  Hash match: NO - FAILED\n`;
+  }
+  
+  return output;
+}).join('\n')}
+
+=== SUMMARY ===
+Total files tested: ${results.length}
+Successful: ${successful.length}
+Failed: ${failed.length}
+`;
+
+  fs.writeFileSync(resultsPath, resultsContent);
+  console.log(`Results saved to: ${resultsPath}`);
+
+  // Generate graphs
+  console.log('\nGenerating decompression visualization graphs...');
+  try {
+    const { spawn } = await import('node:child_process');
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const scriptPath = path.join(baseDir, 'src', 'backend', 'decomp_graph_generator.py');
+    
+    const pythonProcess = spawn(pythonCmd, [scriptPath, resultsPath]);
+    
+    let output = '';
+    let errorOutput = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+      console.log(data.toString().trim());
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+    
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log('\nDecompression graphs generated successfully!');
+      } else {
+        console.error('Graph generation failed:', errorOutput);
+      }
+    });
+  } catch (err) {
+    console.error('Error generating graphs:', err.message);
+  }
 }
 
 testDecompression().catch(err => {

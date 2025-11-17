@@ -1,0 +1,50 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\compressionaction\test_file.txt
+Original hash: aeec825f50f2647a99c42785fa0dbef4e4299bcd4bd80fd5179cee387337fb86
+
+Processing: sample_files.txt.gz
+  Tool: gz
+  Compressed size: 498673 bytes
+  Hash match: NO - FAILED
+
+Processing: test_file.txt.bz2
+  Tool: bz2
+  Compressed size: 206 bytes
+  Decompressed to: test_file.txt_from_bz2.txt
+  Decompressed size: 1075 bytes
+  Hash match: YES - USABLE
+
+Processing: test_file.txt.gz
+  Tool: gz
+  Compressed size: 270 bytes
+  Decompressed to: test_file.txt_from_gz.txt
+  Decompressed size: 1075 bytes
+  Hash match: YES - USABLE
+
+Processing: test_file.txt.lz4
+  Tool: lz4
+  Compressed size: 258 bytes
+  Decompressed to: test_file.txt_from_lz4.txt
+  Decompressed size: 1075 bytes
+  Hash match: YES - USABLE
+
+Processing: test_file.txt.xz
+  Tool: xz
+  Compressed size: 258 bytes
+  Decompressed to: test_file.txt_from_xz.txt
+  Decompressed size: 1075 bytes
+  Hash match: YES - USABLE
+
+Processing: test_file.txt.zst
+  Tool: zst
+  Compressed size: 258 bytes
+  Decompressed to: test_file.txt_from_zst.txt
+  Decompressed size: 1075 bytes
+  Hash match: YES - USABLE
+
+
+=== SUMMARY ===
+Total files tested: 6
+Successful: 5
+Failed: 1
