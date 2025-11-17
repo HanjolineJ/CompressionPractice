@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runCompressionJob } from '../src/backend/compressRunner.js';
+import { runCompressionJob, findRecentCompressedFiles, runDecompressionJob } from '../src/backend/compressRunner.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -86,3 +86,28 @@ ipcMain.handle('get-file-path', async (_evt, file) => {
 ipcMain.handle('run-job', async (_evt, payload) => {
   return await runCompressionJob(payload); // returns { rows, csvPath }
 });
+
+// Find recent compressed files
+ipcMain.handle('find-recent-files', async (_evt, outputDir) => {
+  console.log('find-recent-files handler called with:', outputDir);
+  try {
+    const files = findRecentCompressedFiles(outputDir);
+    console.log('Found files:', files);
+    return files;
+  } catch (error) {
+    console.error('Error finding recent files:', error);
+    throw error;
+  }
+});
+
+// Run decompression
+ipcMain.handle('run-decompress', async (_evt, payload) => {
+  console.log('run-decompress handler called with:', payload);
+  try {
+    return await runDecompressionJob(payload);
+  } catch (error) {
+    console.error('Error in decompression:', error);
+    throw error;
+  }
+});
+

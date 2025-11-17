@@ -18,6 +18,11 @@ export default function App() {
   const [graphPath, setGraphPath] = useState('');
   const [dragOverInput, setDragOverInput] = useState(false);
   const [dragOverOutput, setDragOverOutput] = useState(false);
+  const [showDecompress, setShowDecompress] = useState(false);
+  const [recentFiles, setRecentFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [decompressResult, setDecompressResult] = useState(null);
+  const [decompressing, setDecompressing] = useState(false);
 
   useEffect(() => {
     // Debug: Check if API is available
@@ -65,16 +70,59 @@ export default function App() {
 
   const run = async () => {
     if (!inputPath || !outputDir) return;
-    setRunning(true); setRows([]); setCsvPath(''); setGraphPath('');
+    setRunning(true); setRows([]); setCsvPath(''); setGraphPath(''); setShowDecompress(false);
     try {
       const res = await window.compressAPI.runJob({ inputPath, outputDir, tools });
       setRows(res.rows || []);
       setCsvPath(res.csvPath || '');
       setGraphPath(res.graphPath || '');
+      
+      // After compression, show decompression option and find recent files
+      setShowDecompress(true);
+      const files = await window.compressAPI.findRecentFiles(outputDir);
+      setRecentFiles(files);
+      
+      // Auto-select the most recent file
+      if (files.length > 0) {
+        setSelectedFile(files[0]);
+      }
     } catch (e) {
       alert('Run failed: ' + e.message);
     } finally {
       setRunning(false);
+    }
+  };
+
+  const runDecompress = async () => {
+    if (!selectedFile) return;
+    
+    setDecompressing(true);
+    setDecompressResult(null);
+    
+    try {
+      // Create output path in view_decomp directory
+      const decompDir = outputDir + '\\view_decomp';
+      const baseName = selectedFile.name.replace(/\.(gz|bz2|xz|zst|lz4)$/, '');
+      const outputPath = `${decompDir}\\${baseName}_decompressed.txt`;
+      
+      const result = await window.compressAPI.runDecompress({
+        compressedPath: selectedFile.path,
+        outputPath: outputPath,
+        tool: selectedFile.tool
+      });
+      
+      setDecompressResult(result);
+      
+      if (result.success) {
+        alert(`Decompression successful!\nOutput saved to: ${result.outputPath}`);
+      } else {
+        alert(`Decompression failed: ${result.message}`);
+      }
+    } catch (e) {
+      alert('Decompression failed: ' + e.message);
+      setDecompressResult({ success: false, message: e.message });
+    } finally {
+      setDecompressing(false);
     }
   };
 
@@ -287,6 +335,92 @@ export default function App() {
             </div>
           )}
         </div>
+
+        {/* Card 4: Decompression (appears after compression) */}
+        {showDecompress && (
+          <div style={{background:'#12161c', borderRadius:16, padding:16, marginBottom:16, boxShadow:'0 10px 30px rgba(0,0,0,0.35)'}}>
+            <h2 style={{fontSize:18, fontWeight:700, marginBottom:12}}>4) Decompress Recent Files</h2>
+            <p style={{fontSize:13, opacity:0.8, marginBottom:12}}>
+              Select a compressed file to decompress. The app automatically detects the algorithm based on the file extension.
+            </p>
+            
+            {recentFiles.length > 0 ? (
+              <div>
+                <div style={{fontSize:13, opacity:0.8, marginBottom:8}}>Recent compressed files:</div>
+                <div style={{display:'flex', flexDirection:'column', gap:8, marginBottom:16}}>
+                  {recentFiles.map((file, idx) => (
+                    <label key={idx} style={{
+                      display:'flex', 
+                      alignItems:'center', 
+                      gap:12,
+                      background: selectedFile?.path === file.path ? '#24324a' : '#0f1318',
+                      padding:'12px 16px',
+                      borderRadius:10,
+                      border: selectedFile?.path === file.path ? '2px solid #4f8cff' : '1px solid #1e2633',
+                      cursor:'pointer',
+                      transition:'all 0.2s ease'
+                    }}>
+                      <input 
+                        type="radio" 
+                        name="decompressFile" 
+                        checked={selectedFile?.path === file.path}
+                        onChange={() => setSelectedFile(file)}
+                        style={{cursor:'pointer'}}
+                      />
+                      <div style={{flex:1}}>
+                        <div style={{fontWeight:600, marginBottom:4}}>{file.name}</div>
+                        <div style={{fontSize:12, opacity:0.7}}>
+                          Algorithm: <span style={{textTransform:'uppercase', color:'#4ecdc4'}}>{file.tool}</span>
+                          {' • '}
+                          Modified: {new Date(file.mtime).toLocaleString()}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={runDecompress} 
+                  disabled={decompressing || !selectedFile} 
+                  style={btnPrimary(decompressing || !selectedFile)}
+                >
+                  {decompressing ? 'Decompressing…' : 'Decompress Selected File'}
+                </button>
+                
+                {decompressResult && (
+                  <div style={{
+                    marginTop:16, 
+                    padding:16, 
+                    borderRadius:10,
+                    background: decompressResult.success ? '#1a3a2a' : '#3a1a1a',
+                    border: decompressResult.success ? '1px solid #51cf66' : '1px solid #ff6b6b'
+                  }}>
+                    <div style={{fontSize:14, fontWeight:600, marginBottom:8, color: decompressResult.success ? '#51cf66' : '#ff6b6b'}}>
+                      {decompressResult.success ? '✓ Decompression Successful' : '✗ Decompression Failed'}
+                    </div>
+                    {decompressResult.success && (
+                      <div style={{fontSize:13, opacity:0.9}}>
+                        <div><strong>Output:</strong> {decompressResult.outputPath}</div>
+                        <div><strong>Original Size:</strong> {prettyBytes(decompressResult.compressedSize)}</div>
+                        <div><strong>Decompressed Size:</strong> {prettyBytes(decompressResult.decompressedSize)}</div>
+                        <div><strong>Time:</strong> {decompressResult.decompressTime.toFixed(2)} ms</div>
+                      </div>
+                    )}
+                    {!decompressResult.success && (
+                      <div style={{fontSize:13, opacity:0.9}}>
+                        <div><strong>Error:</strong> {decompressResult.message}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{fontSize:13, opacity:0.7, padding:16, background:'#0f1318', borderRadius:10, border:'1px solid #1e2633'}}>
+                No compressed files found in the output directory. Run compression first to generate files.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer: future hooks */}
         <div style={{fontSize:12, opacity:0.7}}>

@@ -402,3 +402,103 @@ export async function runCompressionJob({ inputPath, outputDir, tools = ['gzip',
 
   return { rows: results, csvPath, graphPath };
 }
+
+/**
+ * Find the most recent compressed files in the output directory
+ */
+export function findRecentCompressedFiles(outputDir, count = 5) {
+  if (!fs.existsSync(outputDir)) return [];
+  
+  const files = fs.readdirSync(outputDir)
+    .filter(f => f.match(/\.(gz|bz2|xz|zst|lz4)$/))
+    .map(f => ({
+      name: f,
+      path: path.join(outputDir, f),
+      mtime: fs.statSync(path.join(outputDir, f)).mtime.getTime(),
+      tool: f.match(/\.(gz|bz2|xz|zst|lz4)$/)[1]
+    }))
+    .sort((a, b) => b.mtime - a.mtime)
+    .slice(0, count);
+  
+  return files;
+}
+
+/**
+ * Decompress a single file and verify integrity
+ */
+function decompressFile(compressedPath, outputPath, tool) {
+  return new Promise((resolve, reject) => {
+    let decompressor;
+    
+    switch(tool) {
+      case 'gz':
+        decompressor = zlib.createGunzip();
+        break;
+      case 'bz2':
+        decompressor = zlib.createBrotliDecompress();
+        break;
+      case 'xz':
+      case 'zst':
+      case 'lz4':
+        decompressor = zlib.createInflate();
+        break;
+      default:
+        return reject(new Error(`Unknown compression tool: ${tool}`));
+    }
+
+    const readStream = fs.createReadStream(compressedPath);
+    const writeStream = fs.createWriteStream(outputPath);
+
+    readStream
+      .pipe(decompressor)
+      .pipe(writeStream)
+      .on('finish', () => resolve())
+      .on('error', (err) => reject(err));
+  });
+}
+
+/**
+ * Run decompression job on a compressed file
+ */
+export async function runDecompressionJob({ compressedPath, outputPath, tool }) {
+  if (!fs.existsSync(compressedPath)) {
+    throw new Error('Compressed file not found');
+  }
+
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const startTime = process.hrtime.bigint();
+  
+  try {
+    await decompressFile(compressedPath, outputPath, tool);
+    
+    const endTime = process.hrtime.bigint();
+    const decompressTime = Number(endTime - startTime) / 1e6;
+    
+    const compressedSize = fs.statSync(compressedPath).size;
+    const decompressedSize = fs.statSync(outputPath).size;
+    
+    return {
+      success: true,
+      compressedPath,
+      outputPath,
+      tool,
+      compressedSize,
+      decompressedSize,
+      decompressTime,
+      message: 'Decompression successful'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      compressedPath,
+      tool,
+      error: true,
+      message: error.message
+    };
+  }
+}
+
