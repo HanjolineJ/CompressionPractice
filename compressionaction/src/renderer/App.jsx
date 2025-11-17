@@ -11,11 +11,11 @@ function prettyBytes(n) {
 export default function App() {
   const [inputPath, setInputPath] = useState('');
   const [outputDir, setOutputDir] = useState('');
-  const [level, setLevel] = useState(6);
   const [tools, setTools] = useState(['zstd','xz','bzip2','gzip','lz4']);
   const [rows, setRows] = useState([]);
   const [running, setRunning] = useState(false);
   const [csvPath, setCsvPath] = useState('');
+  const [graphPath, setGraphPath] = useState('');
   const [dragOverInput, setDragOverInput] = useState(false);
   const [dragOverOutput, setDragOverOutput] = useState(false);
 
@@ -65,11 +65,12 @@ export default function App() {
 
   const run = async () => {
     if (!inputPath || !outputDir) return;
-    setRunning(true); setRows([]); setCsvPath('');
+    setRunning(true); setRows([]); setCsvPath(''); setGraphPath('');
     try {
-      const res = await window.compressAPI.runJob({ inputPath, outputDir, tools, level });
+      const res = await window.compressAPI.runJob({ inputPath, outputDir, tools });
       setRows(res.rows || []);
       setCsvPath(res.csvPath || '');
+      setGraphPath(res.graphPath || '');
     } catch (e) {
       alert('Run failed: ' + e.message);
     } finally {
@@ -175,9 +176,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Card 2: Algorithms + Level (like imager “settings”) */}
+        {/* Card 2: Algorithms (like imager "settings") */}
         <div style={{background:'#12161c', borderRadius:16, padding:16, marginBottom:16, boxShadow:'0 10px 30px rgba(0,0,0,0.35)'}}>
-          <h2 style={{fontSize:18, fontWeight:700, marginBottom:8}}>2) Configure</h2>
+          <h2 style={{fontSize:18, fontWeight:700, marginBottom:8}}>2) Select Compression Tools</h2>
+          <p style={{fontSize:13, opacity:0.8, marginBottom:12}}>Each tool will use optimal settings for best space efficiency. Decompression verification ensures data integrity.</p>
           <div style={{display:'flex', gap:18, flexWrap:'wrap'}}>
             {['zstd','xz','bzip2','gzip','lz4'].map(t => (
               <label key={t} style={chip(tools.includes(t))}>
@@ -185,12 +187,6 @@ export default function App() {
                 <span style={{marginLeft:8, textTransform:'uppercase', letterSpacing:0.5}}>{t}</span>
               </label>
             ))}
-          </div>
-          <div style={{height:14}}/>
-          <div>
-            <div style={{fontSize:13, opacity:0.8, marginBottom:6}}>Compression level ({level})</div>
-            <input type="range" min="1" max="19" value={level} onChange={e=>setLevel(Number(e.target.value))} style={{width:'100%'}}/>
-            <div style={{fontSize:12, opacity:0.7, marginTop:6}}>Tip: zstd ~3–7 for speed; xz higher for max ratio.</div>
           </div>
         </div>
 
@@ -206,26 +202,90 @@ export default function App() {
               <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
                 <thead>
                   <tr style={{textAlign:'left', borderBottom:'1px solid #1e2633'}}>
-                    <th>Tool</th><th>Level</th><th>Src</th><th>Dst</th><th>Saved</th><th>Time (ms)</th><th>Status</th>
+                    <th style={{padding:'8px 4px'}}>Tool</th>
+                    <th style={{padding:'8px 4px'}}>Original Size</th>
+                    <th style={{padding:'8px 4px'}}>Compressed Size</th>
+                    <th style={{padding:'8px 4px'}}>Space Saved</th>
+                    <th style={{padding:'8px 4px'}}>Compression Time</th>
+                    <th style={{padding:'8px 4px'}}>Decompression</th>
+                    <th style={{padding:'8px 4px'}}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                 {rows.map((r,i)=>(
                   <tr key={i} style={{borderBottom:'1px solid #1e2633'}}>
-                    <td>{r.tool}</td>
-                    <td>{r.level ?? ''}</td>
-                    <td>{prettyBytes(r.srcSize || 0)}</td>
-                    <td>{prettyBytes(r.dstSize || 0)}</td>
-                    <td>{(r.ratio!=null) ? (r.ratio*100).toFixed(2)+'%' : ''}</td>
-                    <td>{r.elapsedNs ? (r.elapsedNs/1e6).toFixed(2) : ''}</td>
-                    <td>{r.error ? 'error' : (r.skipped ? 'skipped' : 'ok')}</td>
+                    <td style={{padding:'8px 4px', fontWeight:600}}>{r.tool.toUpperCase()}</td>
+                    <td style={{padding:'8px 4px'}}>{prettyBytes(r.srcSize || 0)}</td>
+                    <td style={{padding:'8px 4px', color:'#4ecdc4'}}>{prettyBytes(r.dstSize || 0)}</td>
+                    <td style={{padding:'8px 4px', color:'#51cf66', fontWeight:600}}>{(r.ratio!=null) ? (r.ratio*100).toFixed(2)+'%' : '0.00%'}</td>
+                    <td style={{padding:'8px 4px'}}>{r.compressTime ? r.compressTime.toFixed(2) + ' ms' : '0 ms'}</td>
+                    <td style={{padding:'8px 4px'}}>
+                      {r.decompressVerified ? (
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          background: '#51cf66',
+                          color: '#0b0d10'
+                        }}>
+                          VERIFIED ({r.decompressTime ? r.decompressTime.toFixed(2) + 'ms' : ''})
+                        </span>
+                      ) : (
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          background: '#ff6b6b',
+                          color: '#0b0d10'
+                        }}>
+                          FAILED
+                        </span>
+                      )}
+                    </td>
+                    <td style={{padding:'8px 4px'}}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        background: r.error ? '#ff6b6b' : (r.skipped ? '#ffd93d' : '#51cf66'),
+                        color: '#0b0d10'
+                      }}>
+                        {r.error ? 'ERROR' : (r.skipped ? 'SKIPPED' : 'USABLE')}
+                      </span>
+                    </td>
                   </tr>
                 ))}
                 </tbody>
               </table>
             </div>
           )}
-          {csvPath && <div style={{marginTop:10, fontSize:13, opacity:0.8}}>CSV saved to: <code>{csvPath}</code></div>}
+          {csvPath && (
+            <div style={{marginTop:10, fontSize:13, opacity:0.8}}>
+              <div>Results saved to: <code style={{background:'#1e2633', padding:'2px 6px', borderRadius:4}}>{csvPath}</code></div>
+            </div>
+          )}
+          {graphPath && (
+            <div style={{marginTop:20}}>
+              <h3 style={{fontSize:16, fontWeight:700, marginBottom:12}}>Compression Analysis</h3>
+              <div style={{background:'#0f1318', borderRadius:10, padding:16, border:'1px solid #1e2633'}}>
+                <img 
+                  src={`file://${graphPath}`} 
+                  alt="Compression Graphs" 
+                  style={{width:'100%', height:'auto', borderRadius:8}}
+                  onError={(e) => {
+                    console.error('Failed to load graph:', graphPath);
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+              <div style={{marginTop:8, fontSize:12, opacity:0.7, textAlign:'center'}}>
+                Visual analysis shows compression efficiency, speed, and file size comparisons
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer: future hooks */}

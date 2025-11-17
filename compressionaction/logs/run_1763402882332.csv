@@ -1,0 +1,6 @@
+tool,src_bytes,dst_bytes,ratio_saved,compress_ms,decompress_ms,verified,status
+zstd,1075,258,0.7600,2.567,8.976,yes,ok
+xz,1075,258,0.7600,1.045,1.679,yes,ok
+bzip2,1075,206,0.8084,1.773,7.845,yes,ok
+gzip,1075,270,0.7488,0.943,9.150,yes,ok
+lz4,1075,258,0.7600,0.704,1.036,yes,ok
