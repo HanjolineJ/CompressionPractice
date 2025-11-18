@@ -23,6 +23,8 @@ export default function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [decompressResult, setDecompressResult] = useState(null);
   const [decompressing, setDecompressing] = useState(false);
+  const [decompGraphPath, setDecompGraphPath] = useState('');
+  const [decompResults, setDecompResults] = useState([]);
 
   useEffect(() => {
     // Debug: Check if API is available
@@ -121,6 +123,32 @@ export default function App() {
     } catch (e) {
       alert('Decompression failed: ' + e.message);
       setDecompressResult({ success: false, message: e.message });
+    } finally {
+      setDecompressing(false);
+    }
+  };
+
+  const runBatchDecompress = async () => {
+    if (recentFiles.length === 0) return;
+    
+    setDecompressing(true);
+    setDecompResults([]);
+    setDecompGraphPath('');
+    
+    try {
+      const result = await window.compressAPI.runBatchDecompress({
+        files: recentFiles,
+        outputDir: outputDir,
+        originalPath: inputPath
+      });
+      
+      setDecompResults(result.results || []);
+      setDecompGraphPath(result.graphPath || '');
+      
+      const successCount = (result.results || []).filter(r => r.success && r.verified).length;
+      alert(`Batch decompression complete!\n${successCount} of ${recentFiles.length} files decompressed and verified successfully.`);
+    } catch (e) {
+      alert('Batch decompression failed: ' + e.message);
     } finally {
       setDecompressing(false);
     }
@@ -379,13 +407,23 @@ export default function App() {
                   ))}
                 </div>
                 
-                <button 
-                  onClick={runDecompress} 
-                  disabled={decompressing || !selectedFile} 
-                  style={btnPrimary(decompressing || !selectedFile)}
-                >
-                  {decompressing ? 'Decompressing…' : 'Decompress Selected File'}
-                </button>
+                <div style={{display:'flex', gap:12}}>
+                  <button 
+                    onClick={runDecompress} 
+                    disabled={decompressing || !selectedFile} 
+                    style={{...btnPrimary(decompressing || !selectedFile), flex: 1}}
+                  >
+                    {decompressing ? 'Decompressing…' : 'Decompress Selected File'}
+                  </button>
+                  
+                  <button 
+                    onClick={runBatchDecompress} 
+                    disabled={decompressing || recentFiles.length === 0} 
+                    style={{...btn(), background: '#51cf66', color: '#0b0d10', fontWeight: 700, flex: 1}}
+                  >
+                    {decompressing ? 'Testing All…' : 'Test All Files (with Graphs)'}
+                  </button>
+                </div>
                 
                 {decompressResult && (
                   <div style={{
@@ -411,6 +449,95 @@ export default function App() {
                         <div><strong>Error:</strong> {decompressResult.message}</div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Batch Decompression Results */}
+                {decompResults.length > 0 && (
+                  <div style={{marginTop:16}}>
+                    <h3 style={{fontSize:16, fontWeight:700, marginBottom:12}}>Decompression Test Results</h3>
+                    <div style={{overflowX:'auto'}}>
+                      <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
+                        <thead>
+                          <tr style={{textAlign:'left', borderBottom:'1px solid #1e2633'}}>
+                            <th style={{padding:'8px 4px'}}>Tool</th>
+                            <th style={{padding:'8px 4px'}}>Compressed</th>
+                            <th style={{padding:'8px 4px'}}>Decompressed</th>
+                            <th style={{padding:'8px 4px'}}>Time (ms)</th>
+                            <th style={{padding:'8px 4px'}}>Verified</th>
+                            <th style={{padding:'8px 4px'}}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {decompResults.map((r,i)=>(
+                          <tr key={i} style={{borderBottom:'1px solid #1e2633'}}>
+                            <td style={{padding:'8px 4px', fontWeight:600}}>{r.tool.toUpperCase()}</td>
+                            <td style={{padding:'8px 4px'}}>{prettyBytes(r.compressedSize || 0)}</td>
+                            <td style={{padding:'8px 4px', color:'#4ecdc4'}}>{prettyBytes(r.decompressedSize || 0)}</td>
+                            <td style={{padding:'8px 4px'}}>{r.decompressTime ? r.decompressTime.toFixed(2) : '0.00'}</td>
+                            <td style={{padding:'8px 4px'}}>
+                              {r.verified ? (
+                                <span style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  background: '#51cf66',
+                                  color: '#0b0d10'
+                                }}>
+                                  ✓ YES
+                                </span>
+                              ) : (
+                                <span style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  background: '#ff6b6b',
+                                  color: '#0b0d10'
+                                }}>
+                                  ✗ NO
+                                </span>
+                              )}
+                            </td>
+                            <td style={{padding:'8px 4px'}}>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                background: r.success && r.verified ? '#51cf66' : '#ff6b6b',
+                                color: '#0b0d10'
+                              }}>
+                                {r.success && r.verified ? 'USABLE' : 'FAILED'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Decompression Graphs */}
+                {decompGraphPath && (
+                  <div style={{marginTop:20}}>
+                    <h3 style={{fontSize:16, fontWeight:700, marginBottom:12}}>Decompression Analysis Visualization</h3>
+                    <div style={{background:'#0f1318', borderRadius:10, padding:16, border:'1px solid #1e2633'}}>
+                      <img 
+                        src={`file://${decompGraphPath}`} 
+                        alt="Decompression Analysis Graphs" 
+                        style={{width:'100%', height:'auto', borderRadius:8}}
+                        onError={(e) => {
+                          console.error('Failed to load decompression graph:', decompGraphPath);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                    <div style={{marginTop:8, fontSize:12, opacity:0.7, textAlign:'center'}}>
+                      Visual analysis showing verification status, compression ratios, and file size comparisons
+                    </div>
                   </div>
                 )}
               </div>

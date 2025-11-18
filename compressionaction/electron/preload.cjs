@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('compressAPI', {
   runJob: (payload) => ipcRenderer.invoke('run-job', payload),
   getFilePath: (file) => ipcRenderer.invoke('get-file-path', file),
   findRecentFiles: (outputDir) => ipcRenderer.invoke('find-recent-files', outputDir),
-  runDecompress: (payload) => ipcRenderer.invoke('run-decompress', payload)
+  runDecompress: (payload) => ipcRenderer.invoke('run-decompress', payload),
+  runBatchDecompress: (payload) => ipcRenderer.invoke('run-batch-decompress', payload)
 });

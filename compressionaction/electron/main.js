@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runCompressionJob, findRecentCompressedFiles, runDecompressionJob } from '../src/backend/compressRunner.js';
+import { runCompressionJob, findRecentCompressedFiles, runDecompressionJob, runBatchDecompressionJob } from '../src/backend/compressRunner.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -107,6 +107,18 @@ ipcMain.handle('run-decompress', async (_evt, payload) => {
     return await runDecompressionJob(payload);
   } catch (error) {
     console.error('Error in decompression:', error);
+    throw error;
+  }
+});
+
+// Run batch decompression with visualization
+ipcMain.handle('run-batch-decompress', async (_evt, payload) => {
+  console.log('run-batch-decompress handler called with:', payload);
+  try {
+    const { runBatchDecompressionJob } = await import('../src/backend/compressRunner.js');
+    return await runBatchDecompressionJob(payload);
+  } catch (error) {
+    console.error('Error in batch decompression:', error);
     throw error;
   }
 });

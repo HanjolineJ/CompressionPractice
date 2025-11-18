@@ -460,7 +460,7 @@ function decompressFile(compressedPath, outputPath, tool) {
 /**
  * Run decompression job on a compressed file
  */
-export async function runDecompressionJob({ compressedPath, outputPath, tool }) {
+export async function runDecompressionJob({ compressedPath, outputPath, tool, originalHash }) {
   if (!fs.existsSync(compressedPath)) {
     throw new Error('Compressed file not found');
   }
@@ -481,6 +481,14 @@ export async function runDecompressionJob({ compressedPath, outputPath, tool }) 
     const compressedSize = fs.statSync(compressedPath).size;
     const decompressedSize = fs.statSync(outputPath).size;
     
+    // Verify decompressed file matches original (if hash provided)
+    let verified = true;
+    let decompressedHash = null;
+    if (originalHash) {
+      decompressedHash = await getFileHash(outputPath);
+      verified = originalHash === decompressedHash;
+    }
+    
     return {
       success: true,
       compressedPath,
@@ -489,7 +497,9 @@ export async function runDecompressionJob({ compressedPath, outputPath, tool }) 
       compressedSize,
       decompressedSize,
       decompressTime,
-      message: 'Decompression successful'
+      verified,
+      decompressedHash,
+      message: verified ? 'Decompression successful and verified' : 'Decompression successful but verification failed'
     };
   } catch (error) {
     return {
@@ -497,8 +507,141 @@ export async function runDecompressionJob({ compressedPath, outputPath, tool }) 
       compressedPath,
       tool,
       error: true,
+      verified: false,
       message: error.message
     };
   }
+}
+
+/**
+ * Run batch decompression on multiple files and generate visualization
+ */
+export async function runBatchDecompressionJob({ files, outputDir, originalPath }) {
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Get original file hash for verification
+  let originalHash = null;
+  if (originalPath && fs.existsSync(originalPath)) {
+    originalHash = await getFileHash(originalPath);
+  }
+
+  const results = [];
+  const decompDir = path.join(outputDir, 'view_decomp');
+  if (!fs.existsSync(decompDir)) {
+    fs.mkdirSync(decompDir, { recursive: true });
+  }
+
+  // Decompress each file
+  for (const file of files) {
+    const baseName = path.basename(file.name, path.extname(file.name));
+    const outputPath = path.join(decompDir, `${baseName}_from_${file.tool}.txt`);
+    
+    const result = await runDecompressionJob({
+      compressedPath: file.path,
+      outputPath,
+      tool: file.tool,
+      originalHash
+    });
+    
+    results.push({
+      ...result,
+      fileName: file.name
+    });
+  }
+
+  // Create results text file
+  const logsDir = path.join(process.cwd(), 'logs');
+  if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+  
+  const resultsPath = path.join(logsDir, `decomp_test_${Date.now()}.txt`);
+  const resultsContent = generateDecompResultsText(results, originalPath, originalHash);
+  fs.writeFileSync(resultsPath, resultsContent);
+
+  // Generate graphs using Python script
+  let graphPath = null;
+  try {
+    graphPath = await generateDecompGraphs(resultsPath);
+  } catch (error) {
+    console.error('Error generating decompression graphs:', error.message);
+  }
+
+  return { results, resultsPath, graphPath };
+}
+
+function generateDecompResultsText(results, originalPath, originalHash) {
+  let text = '=== DECOMPRESSION TEST RESULTS ===\n\n';
+  if (originalPath) {
+    text += `Original file: ${originalPath}\n`;
+  }
+  if (originalHash) {
+    text += `Original hash: ${originalHash}\n\n`;
+  }
+
+  for (const result of results) {
+    text += `Processing: ${result.fileName}\n`;
+    text += `  Tool: ${result.tool}\n`;
+    text += `  Compressed size: ${result.compressedSize || 0} bytes\n`;
+    
+    if (result.success) {
+      text += `  Decompressed to: ${path.basename(result.outputPath)}\n`;
+      text += `  Decompressed size: ${result.decompressedSize} bytes\n`;
+      text += `  Hash match: ${result.verified ? 'YES - USABLE' : 'NO - FAILED'}\n`;
+    } else {
+      text += `  Hash match: NO - FAILED\n`;
+      text += `  Error: ${result.message}\n`;
+    }
+    text += '\n';
+  }
+
+  const successful = results.filter(r => r.success && r.verified);
+  const failed = results.filter(r => !r.success || !r.verified);
+
+  text += '=== SUMMARY ===\n';
+  text += `Total files tested: ${results.length}\n`;
+  text += `Successful: ${successful.length}\n`;
+  text += `Failed: ${failed.length}\n`;
+
+  return text;
+}
+
+function generateDecompGraphs(resultsPath) {
+  return new Promise((resolve, reject) => {
+    const scriptPath = path.join(process.cwd(), 'src', 'backend', 'decomp_graph_generator.py');
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    
+    const pythonProcess = spawn(pythonCmd, [scriptPath, resultsPath]);
+    
+    let output = '';
+    let errorOutput = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+    
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        const match = output.match(/SUCCESS:(.+)/);
+        if (match) {
+          resolve(match[1].trim());
+        } else {
+          resolve(resultsPath.replace('.txt', '_decomp_graphs.png'));
+        }
+      } else {
+        console.error('Python decompression graph generation failed:', errorOutput);
+        reject(new Error(`Graph generation failed with code ${code}: ${errorOutput}`));
+      }
+    });
+    
+    pythonProcess.on('error', (error) => {
+      console.error('Failed to start Python process:', error);
+      reject(new Error(`Failed to start Python: ${error.message}`));
+    });
+  });
 }
 
