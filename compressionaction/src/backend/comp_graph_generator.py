@@ -152,10 +152,21 @@ def generate_compression_graphs(csv_path):
     # Adjust layout to prevent overlap
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     
-    # Save the figure
-    output_path = csv_path.replace('.csv', '_graphs.png')
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    print(f"Graphs saved to: {output_path}")
+    # Save the figure to Graphs folder
+    csv_dir = os.path.dirname(csv_path)
+    csv_filename = os.path.basename(csv_path)
+    
+    # Create Graphs folder in the parent directory of logs
+    parent_dir = os.path.dirname(csv_dir)
+    graphs_dir = os.path.join(parent_dir, 'out_test', 'Graphs')
+    os.makedirs(graphs_dir, exist_ok=True)
+    
+    # Save with compression prefix for clarity
+    graph_filename = csv_filename.replace('.csv', '_compression_graphs.png')
+    output_path = os.path.join(graphs_dir, graph_filename)
+    
+    plt.savefig(output_path, dpi=200, bbox_inches='tight', facecolor='white')
+    print(f"Compression graphs saved to: {output_path}")
     
     return output_path
 

@@ -43,11 +43,9 @@ def generate_decompression_graphs(results_file):
     # Create DataFrame
     df = pd.DataFrame(data)
     
-    # Filter only test_file.txt compressions for cleaner visualization
-    df = df[df['file'].str.contains('test_file.txt')].copy()
-    
+    # No filtering - show all decompression results
     if len(df) == 0:
-        print("No test_file.txt compressions found")
+        print("No decompression data found")
         return None
     
     # Calculate compression ratio
@@ -180,9 +178,20 @@ def generate_decompression_graphs(results_file):
     
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     
-    # Save the figure
-    output_path = results_file.replace('.txt', '_decomp_graphs.png')
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    # Save the figure to Graphs folder
+    results_dir = os.path.dirname(results_file)
+    results_filename = os.path.basename(results_file)
+    
+    # Create Graphs folder in the parent directory of logs
+    parent_dir = os.path.dirname(results_dir)
+    graphs_dir = os.path.join(parent_dir, 'out_test', 'Graphs')
+    os.makedirs(graphs_dir, exist_ok=True)
+    
+    # Save with decompression prefix for clarity
+    graph_filename = results_filename.replace('.txt', '_decompression_graphs.png')
+    output_path = os.path.join(graphs_dir, graph_filename)
+    
+    plt.savefig(output_path, dpi=200, bbox_inches='tight', facecolor='white')
     print(f"Decompression graphs saved to: {output_path}")
     
     return output_path
