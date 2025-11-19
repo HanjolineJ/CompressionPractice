@@ -25,3 +25,5 @@ ls -lh GameAsset.txt LargeDataset.txt sample_files.txt
 python script.py
 
 * Click on compression_action to see the launcher application
+# To run the application
+# npm run dev
