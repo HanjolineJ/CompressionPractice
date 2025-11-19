@@ -25,6 +25,8 @@ export default function App() {
   const [decompressing, setDecompressing] = useState(false);
   const [decompGraphPath, setDecompGraphPath] = useState('');
   const [decompResults, setDecompResults] = useState([]);
+  const [compGraphDataUrl, setCompGraphDataUrl] = useState('');
+  const [decompGraphDataUrl, setDecompGraphDataUrl] = useState('');
 
   useEffect(() => {
     // Debug: Check if API is available
@@ -78,6 +80,17 @@ export default function App() {
       setRows(res.rows || []);
       setCsvPath(res.csvPath || '');
       setGraphPath(res.graphPath || '');
+      
+      // Load compression graph as data URL for display
+      if (res.graphPath) {
+        try {
+          const dataUrl = await window.compressAPI.loadImageAsDataUrl(res.graphPath);
+          setCompGraphDataUrl(dataUrl);
+          console.log('Compression graph loaded as data URL');
+        } catch (error) {
+          console.error('Failed to load compression graph:', error);
+        }
+      }
       
       // After compression, show decompression option and find recent files
       setShowDecompress(true);
@@ -144,6 +157,17 @@ export default function App() {
       
       setDecompResults(result.results || []);
       setDecompGraphPath(result.graphPath || '');
+      
+      // Load decompression graph as data URL for display
+      if (result.graphPath) {
+        try {
+          const dataUrl = await window.compressAPI.loadImageAsDataUrl(result.graphPath);
+          setDecompGraphDataUrl(dataUrl);
+          console.log('Decompression graph loaded as data URL');
+        } catch (error) {
+          console.error('Failed to load decompression graph:', error);
+        }
+      }
       
       const successCount = (result.results || []).filter(r => r.success && r.verified).length;
       alert(`Batch decompression complete!\n${successCount} of ${recentFiles.length} files decompressed and verified successfully.`);
@@ -343,17 +367,18 @@ export default function App() {
               <div>Results saved to: <code style={{background:'#1e2633', padding:'2px 6px', borderRadius:4}}>{csvPath}</code></div>
             </div>
           )}
-          {graphPath && (
+          {compGraphDataUrl && (
             <div style={{marginTop:20}}>
               <h3 style={{fontSize:16, fontWeight:700, marginBottom:12}}>Compression Analysis</h3>
               <div style={{background:'#0f1318', borderRadius:10, padding:16, border:'1px solid #1e2633'}}>
                 <img 
-                  src={`file://${graphPath}`} 
+                  src={compGraphDataUrl} 
                   alt="Compression Graphs" 
                   style={{width:'100%', height:'auto', borderRadius:8}}
+                  onLoad={() => console.log('Compression graph displayed successfully')}
                   onError={(e) => {
-                    console.error('Failed to load graph:', graphPath);
-                    e.target.style.display = 'none';
+                    console.error('Failed to display compression graph');
+                    e.target.parentElement.innerHTML = `<div style="color:#ff6b6b;padding:20px;text-align:center;">Failed to display graph</div>`;
                   }}
                 />
               </div>
@@ -521,17 +546,18 @@ export default function App() {
                 )}
 
                 {/* Decompression Graphs */}
-                {decompGraphPath && (
+                {decompGraphDataUrl && (
                   <div style={{marginTop:20}}>
                     <h3 style={{fontSize:16, fontWeight:700, marginBottom:12}}>Decompression Analysis Visualization</h3>
                     <div style={{background:'#0f1318', borderRadius:10, padding:16, border:'1px solid #1e2633'}}>
                       <img 
-                        src={`file://${decompGraphPath}`} 
+                        src={decompGraphDataUrl} 
                         alt="Decompression Analysis Graphs" 
                         style={{width:'100%', height:'auto', borderRadius:8}}
+                        onLoad={() => console.log('Decompression graph displayed successfully')}
                         onError={(e) => {
-                          console.error('Failed to load decompression graph:', decompGraphPath);
-                          e.target.style.display = 'none';
+                          console.error('Failed to display decompression graph');
+                          e.target.parentElement.innerHTML = `<div style="color:#ff6b6b;padding:20px;text-align:center;">Failed to display graph</div>`;
                         }}
                       />
                     </div>
@@ -551,8 +577,7 @@ export default function App() {
 
         {/* Footer: future hooks */}
         <div style={{fontSize:12, opacity:0.7}}>
-          Future: content-defined chunking, zstd dictionaries, delta patches, OCI/eStargz, cosign — as planned. 
-          (This launcher is the front door for your benchmarks & demos.) 
+          Future: File chunking and hashing to find best algorithms for different files
         </div>
       </div>
     </div>

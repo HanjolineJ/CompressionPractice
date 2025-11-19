@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\AliceInWonderlandTXT.txt
+Original hash: 8f7bd57535114e5b003ae0973a3aa592a479556a9d4cccfc28639a47e40f5101
+
+Processing: AliceInWonderlandTXT.txt.lz4
+  Tool: lz4
+  Compressed size: 27714 bytes
+  Decompressed to: AliceInWonderlandTXT.txt_from_lz4.txt
+  Decompressed size: 74796 bytes
+  Hash match: YES - USABLE
+
+Processing: AliceInWonderlandTXT.txt.gz
+  Tool: gz
+  Compressed size: 27726 bytes
+  Decompressed to: AliceInWonderlandTXT.txt_from_gz.txt
+  Decompressed size: 74796 bytes
+  Hash match: YES - USABLE
+
+Processing: AliceInWonderlandTXT.txt.bz2
+  Tool: bz2
+  Compressed size: 23550 bytes
+  Decompressed to: AliceInWonderlandTXT.txt_from_bz2.txt
+  Decompressed size: 74796 bytes
+  Hash match: YES - USABLE
+
+Processing: AliceInWonderlandTXT.txt.xz
+  Tool: xz
+  Compressed size: 27714 bytes
+  Decompressed to: AliceInWonderlandTXT.txt_from_xz.txt
+  Decompressed size: 74796 bytes
+  Hash match: YES - USABLE
+
+Processing: AliceInWonderlandTXT.txt.zst
+  Tool: zst
+  Compressed size: 27714 bytes
+  Decompressed to: AliceInWonderlandTXT.txt_from_zst.txt
+  Decompressed size: 74796 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

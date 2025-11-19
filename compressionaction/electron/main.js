@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, protocol } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { runCompressionJob, findRecentCompressedFiles, runDecompressionJob, runBatchDecompressionJob } from '../src/backend/compressRunner.js';
 
@@ -17,7 +18,8 @@ function createWindow() {
       // Use CommonJS preload to ensure it runs even with package.json type: module
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      webSecurity: false // Allow loading local files via file:// protocol
     }
   });
 
@@ -26,7 +28,19 @@ function createWindow() {
   else mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Register protocol to serve local files
+  protocol.registerFileProtocol('local-file', (request, callback) => {
+    const url = request.url.replace('local-file:///', '');
+    try {
+      return callback(decodeURIComponent(url));
+    } catch (error) {
+      console.error('Failed to load file:', error);
+    }
+  });
+  
+  createWindow();
+});
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
@@ -119,6 +133,21 @@ ipcMain.handle('run-batch-decompress', async (_evt, payload) => {
     return await runBatchDecompressionJob(payload);
   } catch (error) {
     console.error('Error in batch decompression:', error);
+    throw error;
+  }
+});
+
+// Load graph image as base64 data URL for reliable display
+ipcMain.handle('load-image-as-data-url', async (_evt, imagePath) => {
+  try {
+    if (!fs.existsSync(imagePath)) {
+      throw new Error(`Image not found: ${imagePath}`);
+    }
+    const imageBuffer = fs.readFileSync(imagePath);
+    const base64 = imageBuffer.toString('base64');
+    return `data:image/png;base64,${base64}`;
+  } catch (error) {
+    console.error('Error loading image:', error);
     throw error;
   }
 });
