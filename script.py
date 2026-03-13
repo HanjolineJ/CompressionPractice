@@ -8,6 +8,7 @@ import bz2
 import lzma
 import os
 import time
+import hashlib
 import psutil
 from pathlib import Path
 
@@ -68,6 +69,67 @@ def compress_with_lz4(input_file, output_file):
     with open(output_file, 'wb') as f_out:
         f_out.write(compressed)
 
+def sha256_file(filepath):
+    """Calculate SHA-256 hash for a file"""
+    hasher = hashlib.sha256()
+    with open(filepath, 'rb') as file_handle:
+        while True:
+            chunk = file_handle.read(1024 * 1024)
+            if not chunk:
+                break
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+def decompress_gzip_to_bytes(compressed_file):
+    with gzip.open(compressed_file, 'rb') as file_handle:
+        return file_handle.read()
+
+def decompress_bzip2_to_bytes(compressed_file):
+    with bz2.open(compressed_file, 'rb') as file_handle:
+        return file_handle.read()
+
+def decompress_xz_to_bytes(compressed_file):
+    with lzma.open(compressed_file, 'rb') as file_handle:
+        return file_handle.read()
+
+def decompress_zstd_to_bytes(compressed_file):
+    if 'zstd' not in OPTIONAL_LIBS:
+        raise ImportError("zstandard not available")
+
+    dctx = OPTIONAL_LIBS['zstd'].ZstdDecompressor()
+    with open(compressed_file, 'rb') as file_handle:
+        with dctx.stream_reader(file_handle) as reader:
+            return reader.read()
+
+def decompress_lz4_to_bytes(compressed_file):
+    if 'lz4' not in OPTIONAL_LIBS:
+        raise ImportError("lz4 not available")
+
+    with open(compressed_file, 'rb') as file_handle:
+        compressed = file_handle.read()
+    return OPTIONAL_LIBS['lz4'].decompress(compressed)
+
+def verify_round_trip(input_file, compressed_file, algorithm_name):
+    """Verify compressed file can be decompressed back to original content using SHA-256."""
+    original_sha256 = sha256_file(input_file)
+
+    decompressors = {
+        'gzip': decompress_gzip_to_bytes,
+        'bzip2': decompress_bzip2_to_bytes,
+        'xz': decompress_xz_to_bytes,
+        'zstd': decompress_zstd_to_bytes,
+        'lz4': decompress_lz4_to_bytes
+    }
+
+    decompressed = decompressors[algorithm_name](compressed_file)
+    decompressed_sha256 = hashlib.sha256(decompressed).hexdigest()
+
+    return {
+        'verified': original_sha256 == decompressed_sha256,
+        'original_sha256': original_sha256,
+        'decompressed_sha256': decompressed_sha256
+    }
+
 def compress_file(input_file, output_dir=".venv"):
     """Compress a single file using all available algorithms"""
     # Create output directory if it doesn't exist
@@ -93,11 +155,15 @@ def compress_file(input_file, output_dir=".venv"):
             compression_time = time.time() - start_time
             
             compressed_size = get_file_size(output_file)
+            verification = verify_round_trip(input_file, output_file, algo_name)
             results[algo_name] = {
                 'success': True,
                 'file': str(output_file),
                 'size': compressed_size,
-                'time': compression_time
+                'time': compression_time,
+                'verified': verification['verified'],
+                'original_sha256': verification['original_sha256'],
+                'decompressed_sha256': verification['decompressed_sha256']
             }
         except ImportError:
             results[algo_name] = {
@@ -176,7 +242,8 @@ def main():
                 
                 print(f"{algo_name:>6}: {format_bytes(compressed_size):>10} "
                       f"({compression_ratio:5.1f}% saved) "
-                      f"[{result['time']:.3f}s]")
+                        f"[{result['time']:.3f}s] "
+                        f"verify={'PASS' if result['verified'] else 'FAIL'}")
             else:
                 print(f"{algo_name:>6}: {result['error']}")
     
