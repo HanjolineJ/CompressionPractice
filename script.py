@@ -57,10 +57,16 @@ def compress_with_lz4(input_file, output_file):
     """Compress using lz4"""
     if 'lz4' not in OPTIONAL_LIBS:
         raise ImportError("lz4 not available")
-    
+    # Read the input file fully and use the stable `compress(bytes) -> bytes`
+    # API. Some lz4.frame installations do not provide `compress_stream`, so
+    # this pattern is more portable and reliable.
     with open(input_file, 'rb') as f_in:
-        with open(output_file, 'wb') as f_out:
-            OPTIONAL_LIBS['lz4'].compress_stream(f_in, f_out)
+        data = f_in.read()
+
+    compressed = OPTIONAL_LIBS['lz4'].compress(data)
+
+    with open(output_file, 'wb') as f_out:
+        f_out.write(compressed)
 
 def compress_file(input_file, output_dir=".venv"):
     """Compress a single file using all available algorithms"""
