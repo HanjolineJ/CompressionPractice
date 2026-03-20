@@ -1,106 +1,124 @@
 # ---- 1) Package setup ----
 suppressPackageStartupMessages({
-  if (!requireNamespace("readr", quietly = TRUE)) {
-    stop("Package 'readr' is required. Install with: Rscript -e \"install.packages('readr', repos='https://cloud.r-project.org')\"")
+  # Define required packages
+  required_packages <- c("readr", "dplyr", "caret", "rpart", "rpart.plot")
+
+  # Check and install missing packages
+  for (pkg in required_packages) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
+      cat("Installing package:", pkg, "\n")
+      install.packages(pkg, repos = "https://cloud.r-project.org")
+    }
   }
+  
+  # Load packages
   library(readr)
+  library(dplyr)
+  library(caret)
+  library(rpart)
+  library(rpart.plot)
 })
 
-`%||%` <- function(a, b) {
-  if (!is.null(a) && nzchar(a)) a else b
+# ---- 2) Locate and load data ----
+# The agent has identified the most recent benchmark run.
+# If you want to use a different file, change the path here.
+csv_path <- file.path("..", "compressionaction", "logs", "run_1763564918695.csv")
+
+if (!file.exists(csv_path)) {
+  stop(paste("Specified CSV file not found at:", csv_path))
 }
 
-# ---- 2) Locate CSV ----
-args <- commandArgs(trailingOnly = FALSE)
-file_arg <- grep("^--file=", args, value = TRUE)
-
-if (length(file_arg) > 0) {
-  script_path <- sub("^--file=", "", file_arg[1])
-  script_dir <- dirname(normalizePath(script_path, mustWork = FALSE))
-} else {
-  script_dir <- getwd()
-}
-
-candidate_paths <- c(
-  file.path(script_dir, "your_dataset.csv"),
-  file.path(script_dir, "vgsales.csv"),
-  file.path(script_dir, "video_game_sales.csv"),
-  file.path(script_dir, "dataset.csv")
-)
-
-existing_candidates <- candidate_paths[file.exists(candidate_paths)]
-
-if (length(existing_candidates) == 0) {
-  csv_files <- list.files(script_dir, pattern = "\\.csv$", full.names = TRUE, ignore.case = TRUE)
-  if (length(csv_files) == 0) {
-    stop(paste0("No CSV found in ", script_dir, ". Put your dataset there or edit candidate_paths."))
-  }
-  csv_path <- csv_files[1]
-} else {
-  csv_path <- existing_candidates[1]
-}
-
-cat("Using CSV:", csv_path, "\n")
+cat("Using benchmark data:", csv_path, "\n")
 df <- read_csv(csv_path, show_col_types = FALSE)
 
-# ---- 3) Choose target column ----
-preferred_targets <- c("Global_Sales", "global_sales", "Sales", "sales", "Y")
-found_targets <- preferred_targets[preferred_targets %in% names(df)]
+# ---- 3) Feature Engineering: Determine the best algorithm ----
+# For each file, find the algorithm with the highest usability_score.
+# This will be our target variable for classification.
+df_best <- df %>%
+  filter(lossless_valid == TRUE) %>%
+  group_by(file_path) %>%
+  slice_max(order_by = usability_score, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(file_path, best_algorithm = algorithm)
 
-if (length(found_targets) > 0) {
-  target_col <- found_targets[1]
-} else {
-  numeric_cols <- names(df)[sapply(df, is.numeric)]
-  if (length(numeric_cols) == 0) {
-    stop("No numeric target candidate found. Please add a numeric sales/target column.")
-  }
-  target_col <- numeric_cols[length(numeric_cols)]
-  warning(paste("Target column not found by name; using numeric column:", target_col))
+# Join the target variable back to the main dataframe
+df <- df %>%
+  inner_join(df_best, by = "file_path")
+
+# Convert character columns to factors for the model
+df <- df %>%
+  mutate(
+    algorithm = as.factor(algorithm),
+    best_algorithm = as.factor(best_algorithm),
+    extension = as.factor(extension)
+  )
+
+# ---- 4) Select features and target ----
+# Per instructions, we predict the best algorithm based on file features.
+features <- c("file_size_bytes", "extension")
+target_col <- "best_algorithm"
+
+# Ensure required columns exist
+model_cols <- c(features, target_col)
+if (!all(model_cols %in% names(df))) {
+  stop("Dataset is missing required columns for modeling. Need: ", paste(model_cols, collapse=", "))
 }
 
-cat("Target column:", target_col, "\n")
-
-# ---- 4) Basic cleanup ----
-df <- df[!is.na(df[[target_col]]), ]
-
-char_cols <- names(df)[sapply(df, is.character)]
-for (column_name in char_cols) {
-  df[[column_name]] <- as.factor(df[[column_name]])
-}
-
-# Remove columns with all NAs to avoid model issues
-all_na_cols <- names(df)[colSums(is.na(df)) == nrow(df)]
-if (length(all_na_cols) > 0) {
-  df <- df[, setdiff(names(df), all_na_cols), drop = FALSE]
-}
-
-if (nrow(df) < 10) {
-  stop("Dataset is too small after cleanup (<10 rows).")
-}
-
-# ---- 5) Train/test split (base R) ----
+# ---- 5) Train/test split ----
 set.seed(42)
-idx <- sample(seq_len(nrow(df)), size = floor(0.8 * nrow(df)))
-train_df <- df[idx, , drop = FALSE]
-test_df <- df[-idx, , drop = FALSE]
+# We need to ensure the split is done on a per-file basis, not per-row.
+unique_files <- unique(df$file_path)
+train_files_idx <- createDataPartition(unique_files, p = 0.8, list = FALSE)
+train_files <- unique_files[train_files_idx]
 
-if (nrow(test_df) == 0) {
-  stop("Test split is empty. Need more rows in dataset.")
+train_df <- df[df$file_path %in% train_files, ]
+test_df <- df[!df$file_path %in% train_files, ]
+
+if (nrow(train_df) == 0 || nrow(test_df) == 0) {
+  stop("Train or test split is empty. Need more diverse data.")
 }
 
-# ---- 6) Baseline model ----
-formula_txt <- paste(target_col, "~ .")
-baseline_model <- lm(as.formula(formula_txt), data = train_df)
+cat("Training data rows:", nrow(train_df), "\n")
+cat("Testing data rows:", nrow(test_df), "\n")
 
-# ---- 7) Evaluate ----
-pred <- predict(baseline_model, newdata = test_df)
-actual <- test_df[[target_col]]
+# ---- 6) Train a Decision Tree Model ----
+# Using rpart as recommended for a baseline model.
+formula_txt <- paste(target_col, "~", paste(features, collapse = " + "))
+cat("Using formula:", formula_txt, "\n")
 
-rmse <- sqrt(mean((pred - actual) ^ 2, na.rm = TRUE))
-mae <- mean(abs(pred - actual), na.rm = TRUE)
+# We train on the full training set to predict the single best algorithm.
+# Note: We are training on all algorithm records, not just the "best" ones,
+# so the model learns the properties of each.
+model <- rpart(
+  as.formula(formula_txt),
+  data = train_df,
+  method = "class"
+)
 
-cat("\nBaseline Results\n")
-cat("Rows:", nrow(df), "\n")
-cat("Columns:", ncol(df), "\n")
-cat("RMSE:", rmse, "\n")
-cat("MAE :", mae, "\n")
+# ---- 7) Evaluate Model ----
+# Predict the best algorithm for the test set files
+# Note: We only need to predict once per file, so we use a distinct subset of the test data.
+test_files_df <- test_df %>% distinct(file_path, .keep_all = TRUE)
+predictions <- predict(model, newdata = test_files_df, type = "class")
+
+# Get the actual best algorithm for the test set
+actuals <- test_files_df[[target_col]]
+
+# Calculate accuracy
+confusion_matrix <- confusionMatrix(predictions, actuals)
+accuracy <- confusion_matrix$overall['Accuracy']
+
+cat("\n--- Model Evaluation ---\n")
+cat("Model: Decision Tree (rpart)\n")
+cat("Accuracy on test set:", sprintf("%.2f%%", accuracy * 100), "\n\n")
+
+print(confusion_matrix)
+
+# ---- 8) Visualize the Decision Tree ----
+cat("\n--- Visualizing Model ---\n")
+# Plot the tree to understand its logic
+# This helps interpret how it makes decisions based on features.
+png("decision_tree.png", width = 1000, height = 600)
+rpart.plot(model, main = "Decision Tree for Best Compression Algorithm", box.palette = "auto")
+dev.off()
+cat("Saved decision tree visualization to decision_tree.png\n")
