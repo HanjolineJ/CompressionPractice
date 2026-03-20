@@ -1,1 +1,4 @@
 node_modules
+
+# Hide Copilot instructions from git
+.github/copilot-instructions.md
