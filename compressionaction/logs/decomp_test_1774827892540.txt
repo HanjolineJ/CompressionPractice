@@ -26,7 +26,7 @@ Processing: AliceInWonderlandTXT.txt.lz4
 
 Processing: AliceInWonderlandTXT.txt.xz
   Tool: xz
-  Compressed size: 27714 bytes
+  Compressed size: 21000 bytes
   Decompressed to: AliceInWonderlandTXT.txt_from_xz.txt
   Decompressed size: 74796 bytes
   Hash match: YES - USABLE
