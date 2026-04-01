@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/Downloads/freedoom-0.13.0.zip
+Original hash: 3f9b264f3e3ce503b4fb7f6bdcb1f419d93c7b546f4df3e874dd878db9688f59
+
+Processing: freedoom-0.13.0.zip.lz4
+  Tool: lz4
+  Compressed size: 24083400 bytes
+  Decompressed to: freedoom-0.13.0.zip_from_lz4.txt
+  Decompressed size: 24143781 bytes
+  Hash match: YES - USABLE
+
+Processing: freedoom-0.13.0.zip.gz
+  Tool: gz
+  Compressed size: 24083412 bytes
+  Decompressed to: freedoom-0.13.0.zip_from_gz.txt
+  Decompressed size: 24143781 bytes
+  Hash match: YES - USABLE
+
+Processing: freedoom-0.13.0.zip.bz2
+  Tool: bz2
+  Compressed size: 23992633 bytes
+  Decompressed to: freedoom-0.13.0.zip_from_bz2.txt
+  Decompressed size: 24143781 bytes
+  Hash match: YES - USABLE
+
+Processing: freedoom-0.13.0.zip.xz
+  Tool: xz
+  Compressed size: 24083400 bytes
+  Decompressed to: freedoom-0.13.0.zip_from_xz.txt
+  Decompressed size: 24143781 bytes
+  Hash match: YES - USABLE
+
+Processing: freedoom-0.13.0.zip.zst
+  Tool: zst
+  Compressed size: 24083400 bytes
+  Decompressed to: freedoom-0.13.0.zip_from_zst.txt
+  Decompressed size: 24143781 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0
