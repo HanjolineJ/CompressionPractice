@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/player.edf
+Original hash: 33d0ab36b89525256774d4cb31e3ecfcc33f21860ec4fdf9d87f597cbd882a2c
+
+Processing: player.edf.lz4
+  Tool: lz4
+  Compressed size: 1661 bytes
+  Decompressed to: player.edf_from_lz4.txt
+  Decompressed size: 7479 bytes
+  Hash match: YES - USABLE
+
+Processing: player.edf.bz2
+  Tool: bz2
+  Compressed size: 1465 bytes
+  Decompressed to: player.edf_from_bz2.txt
+  Decompressed size: 7479 bytes
+  Hash match: YES - USABLE
+
+Processing: player.edf.gz
+  Tool: gz
+  Compressed size: 1673 bytes
+  Decompressed to: player.edf_from_gz.txt
+  Decompressed size: 7479 bytes
+  Hash match: YES - USABLE
+
+Processing: player.edf.xz
+  Tool: xz
+  Compressed size: 1661 bytes
+  Decompressed to: player.edf_from_xz.txt
+  Decompressed size: 7479 bytes
+  Hash match: YES - USABLE
+
+Processing: player.edf.zst
+  Tool: zst
+  Compressed size: 1661 bytes
+  Decompressed to: player.edf_from_zst.txt
+  Decompressed size: 7479 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

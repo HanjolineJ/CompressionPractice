@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/sounds.edf
+Original hash: 27b2feaf652ccd4ff608d568cbe1a8ab50c78afb601a5317c5dd9a9e934e4c56
+
+Processing: sounds.edf.bz2
+  Tool: bz2
+  Compressed size: 1229 bytes
+  Decompressed to: sounds.edf_from_bz2.txt
+  Decompressed size: 9108 bytes
+  Hash match: YES - USABLE
+
+Processing: sounds.edf.gz
+  Tool: gz
+  Compressed size: 1531 bytes
+  Decompressed to: sounds.edf_from_gz.txt
+  Decompressed size: 9108 bytes
+  Hash match: YES - USABLE
+
+Processing: sounds.edf.lz4
+  Tool: lz4
+  Compressed size: 1519 bytes
+  Decompressed to: sounds.edf_from_lz4.txt
+  Decompressed size: 9108 bytes
+  Hash match: YES - USABLE
+
+Processing: sounds.edf.xz
+  Tool: xz
+  Compressed size: 1519 bytes
+  Decompressed to: sounds.edf_from_xz.txt
+  Decompressed size: 9108 bytes
+  Hash match: YES - USABLE
+
+Processing: sounds.edf.zst
+  Tool: zst
+  Compressed size: 1519 bytes
+  Decompressed to: sounds.edf_from_zst.txt
+  Decompressed size: 9108 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

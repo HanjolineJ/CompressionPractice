@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/goat-s&amp;003128.png
+Original hash: 4a4ed73dcd6a37f111c6004815739d089d7b5c5cea9159714a1f8afcd4bf5ecf
+
+Processing: goat-s&amp;003128.png.bz2
+  Tool: bz2
+  Compressed size: 214416 bytes
+  Decompressed to: goat-s&amp;003128.png_from_bz2.txt
+  Decompressed size: 214411 bytes
+  Hash match: YES - USABLE
+
+Processing: goat-s&amp;003128.png.gz
+  Tool: gz
+  Compressed size: 214083 bytes
+  Decompressed to: goat-s&amp;003128.png_from_gz.txt
+  Decompressed size: 214411 bytes
+  Hash match: YES - USABLE
+
+Processing: goat-s&amp;003128.png.lz4
+  Tool: lz4
+  Compressed size: 214071 bytes
+  Decompressed to: goat-s&amp;003128.png_from_lz4.txt
+  Decompressed size: 214411 bytes
+  Hash match: YES - USABLE
+
+Processing: goat-s&amp;003128.png.xz
+  Tool: xz
+  Compressed size: 214071 bytes
+  Decompressed to: goat-s&amp;003128.png_from_xz.txt
+  Decompressed size: 214411 bytes
+  Hash match: YES - USABLE
+
+Processing: goat-s&amp;003128.png.zst
+  Tool: zst
+  Compressed size: 214071 bytes
+  Decompressed to: goat-s&amp;003128.png_from_zst.txt
+  Decompressed size: 214411 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

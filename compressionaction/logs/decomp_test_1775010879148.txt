@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/crispy-doom/src/strife/p_map.c
+Original hash: 5b21c1b6a489116468563aebd24332f397240829351dd4f9cc8a0638d25e9d27
+
+Processing: p_map.c.gz
+  Tool: gz
+  Compressed size: 11090 bytes
+  Decompressed to: p_map.c_from_gz.txt
+  Decompressed size: 41277 bytes
+  Hash match: YES - USABLE
+
+Processing: p_map.c.lz4
+  Tool: lz4
+  Compressed size: 11078 bytes
+  Decompressed to: p_map.c_from_lz4.txt
+  Decompressed size: 41277 bytes
+  Hash match: YES - USABLE
+
+Processing: p_map.c.bz2
+  Tool: bz2
+  Compressed size: 9604 bytes
+  Decompressed to: p_map.c_from_bz2.txt
+  Decompressed size: 41277 bytes
+  Hash match: YES - USABLE
+
+Processing: p_map.c.xz
+  Tool: xz
+  Compressed size: 11078 bytes
+  Decompressed to: p_map.c_from_xz.txt
+  Decompressed size: 41277 bytes
+  Hash match: YES - USABLE
+
+Processing: p_map.c.zst
+  Tool: zst
+  Compressed size: 11078 bytes
+  Decompressed to: p_map.c_from_zst.txt
+  Decompressed size: 41277 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

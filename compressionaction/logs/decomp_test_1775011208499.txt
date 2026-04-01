@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/hedgehog-dscn0523.png
+Original hash: 0f80b5aab42c8e3dc3f16942782ebc1b6d31ec99fb8d3f7f478bd596cbc1e9f3
+
+Processing: hedgehog-dscn0523.png.bz2
+  Tool: bz2
+  Compressed size: 224236 bytes
+  Decompressed to: hedgehog-dscn0523.png_from_bz2.txt
+  Decompressed size: 224231 bytes
+  Hash match: YES - USABLE
+
+Processing: hedgehog-dscn0523.png.gz
+  Tool: gz
+  Compressed size: 224319 bytes
+  Decompressed to: hedgehog-dscn0523.png_from_gz.txt
+  Decompressed size: 224231 bytes
+  Hash match: YES - USABLE
+
+Processing: hedgehog-dscn0523.png.lz4
+  Tool: lz4
+  Compressed size: 224307 bytes
+  Decompressed to: hedgehog-dscn0523.png_from_lz4.txt
+  Decompressed size: 224231 bytes
+  Hash match: YES - USABLE
+
+Processing: hedgehog-dscn0523.png.xz
+  Tool: xz
+  Compressed size: 224307 bytes
+  Decompressed to: hedgehog-dscn0523.png_from_xz.txt
+  Decompressed size: 224231 bytes
+  Hash match: YES - USABLE
+
+Processing: hedgehog-dscn0523.png.zst
+  Tool: zst
+  Compressed size: 224307 bytes
+  Decompressed to: hedgehog-dscn0523.png_from_zst.txt
+  Decompressed size: 224231 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

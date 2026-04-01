@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/effects.edf
+Original hash: 01c5c2d7fd75005d0e5fd249fed56fb277de31ba2cf537dd0ad7b9448b231b4c
+
+Processing: effects.edf.bz2
+  Tool: bz2
+  Compressed size: 92 bytes
+  Decompressed to: effects.edf_from_bz2.txt
+  Decompressed size: 117 bytes
+  Hash match: YES - USABLE
+
+Processing: effects.edf.gz
+  Tool: gz
+  Compressed size: 119 bytes
+  Decompressed to: effects.edf_from_gz.txt
+  Decompressed size: 117 bytes
+  Hash match: YES - USABLE
+
+Processing: effects.edf.lz4
+  Tool: lz4
+  Compressed size: 107 bytes
+  Decompressed to: effects.edf_from_lz4.txt
+  Decompressed size: 117 bytes
+  Hash match: YES - USABLE
+
+Processing: effects.edf.xz
+  Tool: xz
+  Compressed size: 107 bytes
+  Decompressed to: effects.edf_from_xz.txt
+  Decompressed size: 117 bytes
+  Hash match: YES - USABLE
+
+Processing: effects.edf.zst
+  Tool: zst
+  Compressed size: 107 bytes
+  Decompressed to: effects.edf_from_zst.txt
+  Decompressed size: 117 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

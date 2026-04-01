@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/publicdomainpictures.net-zebra-skin-11297062987mjt.jpg
+Original hash: 3276660aaa9eace76c0edb375a7b5d65a2918aa1ce3653b3bdfc4c948e3ce9bb
+
+Processing: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg.bz2
+  Tool: bz2
+  Compressed size: 554204 bytes
+  Decompressed to: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg_from_bz2.txt
+  Decompressed size: 554199 bytes
+  Hash match: YES - USABLE
+
+Processing: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg.gz
+  Tool: gz
+  Compressed size: 553219 bytes
+  Decompressed to: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg_from_gz.txt
+  Decompressed size: 554199 bytes
+  Hash match: YES - USABLE
+
+Processing: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg.lz4
+  Tool: lz4
+  Compressed size: 553207 bytes
+  Decompressed to: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg_from_lz4.txt
+  Decompressed size: 554199 bytes
+  Hash match: YES - USABLE
+
+Processing: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg.xz
+  Tool: xz
+  Compressed size: 553207 bytes
+  Decompressed to: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg_from_xz.txt
+  Decompressed size: 554199 bytes
+  Hash match: YES - USABLE
+
+Processing: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg.zst
+  Tool: zst
+  Compressed size: 553207 bytes
+  Decompressed to: publicdomainpictures.net-zebra-skin-11297062987mjt.jpg_from_zst.txt
+  Decompressed size: 554199 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

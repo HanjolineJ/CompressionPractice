@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/deer-tt7020751.png
+Original hash: b250318ac1529eddd0c1618a98bdbc169034a899940ea5463fc0c142bcbd92c8
+
+Processing: deer-tt7020751.png.bz2
+  Tool: bz2
+  Compressed size: 44568 bytes
+  Decompressed to: deer-tt7020751.png_from_bz2.txt
+  Decompressed size: 44820 bytes
+  Hash match: YES - USABLE
+
+Processing: deer-tt7020751.png.gz
+  Tool: gz
+  Compressed size: 44767 bytes
+  Decompressed to: deer-tt7020751.png_from_gz.txt
+  Decompressed size: 44820 bytes
+  Hash match: YES - USABLE
+
+Processing: deer-tt7020751.png.lz4
+  Tool: lz4
+  Compressed size: 44755 bytes
+  Decompressed to: deer-tt7020751.png_from_lz4.txt
+  Decompressed size: 44820 bytes
+  Hash match: YES - USABLE
+
+Processing: deer-tt7020751.png.xz
+  Tool: xz
+  Compressed size: 44755 bytes
+  Decompressed to: deer-tt7020751.png_from_xz.txt
+  Decompressed size: 44820 bytes
+  Hash match: YES - USABLE
+
+Processing: deer-tt7020751.png.zst
+  Tool: zst
+  Compressed size: 44755 bytes
+  Decompressed to: deer-tt7020751.png_from_zst.txt
+  Decompressed size: 44820 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

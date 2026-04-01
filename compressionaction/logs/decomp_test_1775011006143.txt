@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/sprites.edf
+Original hash: dd9df99245cab2f0085bab6bf410e5dd68bb0bec593a29c1ce02268ccdf6363b
+
+Processing: sprites.edf.bz2
+  Tool: bz2
+  Compressed size: 1544 bytes
+  Decompressed to: sprites.edf_from_bz2.txt
+  Decompressed size: 6398 bytes
+  Hash match: YES - USABLE
+
+Processing: sprites.edf.gz
+  Tool: gz
+  Compressed size: 1799 bytes
+  Decompressed to: sprites.edf_from_gz.txt
+  Decompressed size: 6398 bytes
+  Hash match: YES - USABLE
+
+Processing: sprites.edf.lz4
+  Tool: lz4
+  Compressed size: 1787 bytes
+  Decompressed to: sprites.edf_from_lz4.txt
+  Decompressed size: 6398 bytes
+  Hash match: YES - USABLE
+
+Processing: sprites.edf.xz
+  Tool: xz
+  Compressed size: 1787 bytes
+  Decompressed to: sprites.edf_from_xz.txt
+  Decompressed size: 6398 bytes
+  Hash match: YES - USABLE
+
+Processing: sprites.edf.zst
+  Tool: zst
+  Compressed size: 1787 bytes
+  Decompressed to: sprites.edf_from_zst.txt
+  Decompressed size: 6398 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0
