@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import zlib from 'node:zlib';
 import { spawn } from 'node:child_process';
+import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 const _require = createRequire(import.meta.url);
@@ -91,19 +92,36 @@ async function compressGzip(inputPath) {
     const originalHash = await getFileHash(inputPath);
     const outPath = inputPath + '.gz';
 
+    // Use synchronous zlib for small files to avoid Windows stream race condition
+    // where 'finish' fires before the Promise listener is attached on sub-KB files.
+    // Use stream.pipeline() for larger files to avoid loading everything into memory.
+    const srcBytes = fs.statSync(inputPath).size;
+
     const t0 = process.hrtime.bigint();
-    await new Promise((res, rej) => {
-      fs.createReadStream(inputPath).pipe(zlib.createGzip({ level: 9 }))
-        .pipe(fs.createWriteStream(outPath)).on('finish', res).on('error', rej);
-    });
+    if (srcBytes < 65536) {
+      const compressed = zlib.gzipSync(fs.readFileSync(inputPath), { level: 9 });
+      fs.writeFileSync(outPath, compressed);
+    } else {
+      await pipeline(
+        fs.createReadStream(inputPath),
+        zlib.createGzip({ level: 9 }),
+        fs.createWriteStream(outPath)
+      );
+    }
     const compressTime = Number(process.hrtime.bigint() - t0) / 1e6;
 
-    const t1 = process.hrtime.bigint();
     const decompressedPath = inputPath + '.gz.decompressed';
-    await new Promise((res, rej) => {
-      fs.createReadStream(outPath).pipe(zlib.createGunzip())
-        .pipe(fs.createWriteStream(decompressedPath)).on('finish', res).on('error', rej);
-    });
+    const t1 = process.hrtime.bigint();
+    if (srcBytes < 65536) {
+      const decompressed = zlib.gunzipSync(fs.readFileSync(outPath));
+      fs.writeFileSync(decompressedPath, decompressed);
+    } else {
+      await pipeline(
+        fs.createReadStream(outPath),
+        zlib.createGunzip(),
+        fs.createWriteStream(decompressedPath)
+      );
+    }
     const decompressTime = Number(process.hrtime.bigint() - t1) / 1e6;
 
     const decompressedHash = await getFileHash(decompressedPath);
@@ -126,21 +144,34 @@ async function compressBzip2(inputPath) {
   try {
     const originalHash = await getFileHash(inputPath);
     const outPath = inputPath + '.bz2';
+    const srcBytes = fs.statSync(inputPath).size;
+    const brotliOpts = { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } };
 
     const t0 = process.hrtime.bigint();
-    await new Promise((res, rej) => {
-      fs.createReadStream(inputPath)
-        .pipe(zlib.createBrotliCompress({ params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } }))
-        .pipe(fs.createWriteStream(outPath)).on('finish', res).on('error', rej);
-    });
+    if (srcBytes < 65536) {
+      const compressed = zlib.brotliCompressSync(fs.readFileSync(inputPath), brotliOpts);
+      fs.writeFileSync(outPath, compressed);
+    } else {
+      await pipeline(
+        fs.createReadStream(inputPath),
+        zlib.createBrotliCompress(brotliOpts),
+        fs.createWriteStream(outPath)
+      );
+    }
     const compressTime = Number(process.hrtime.bigint() - t0) / 1e6;
 
-    const t1 = process.hrtime.bigint();
     const decompressedPath = inputPath + '.bz2.decompressed';
-    await new Promise((res, rej) => {
-      fs.createReadStream(outPath).pipe(zlib.createBrotliDecompress())
-        .pipe(fs.createWriteStream(decompressedPath)).on('finish', res).on('error', rej);
-    });
+    const t1 = process.hrtime.bigint();
+    if (srcBytes < 65536) {
+      const decompressed = zlib.brotliDecompressSync(fs.readFileSync(outPath));
+      fs.writeFileSync(decompressedPath, decompressed);
+    } else {
+      await pipeline(
+        fs.createReadStream(outPath),
+        zlib.createBrotliDecompress(),
+        fs.createWriteStream(decompressedPath)
+      );
+    }
     const decompressTime = Number(process.hrtime.bigint() - t1) / 1e6;
 
     const decompressedHash = await getFileHash(decompressedPath);
@@ -395,18 +426,24 @@ export function findRecentCompressedFiles(outputDir, count = 5) {
 
 async function decompressFile(compressedPath, outputPath, tool) {
   switch (tool) {
-    case 'gz':
-      await new Promise((res, rej) => {
-        fs.createReadStream(compressedPath).pipe(zlib.createGunzip())
-          .pipe(fs.createWriteStream(outputPath)).on('finish', res).on('error', rej);
-      });
+    case 'gz': {
+      const gzSize = fs.statSync(compressedPath).size;
+      if (gzSize < 65536) {
+        fs.writeFileSync(outputPath, zlib.gunzipSync(fs.readFileSync(compressedPath)));
+      } else {
+        await pipeline(fs.createReadStream(compressedPath), zlib.createGunzip(), fs.createWriteStream(outputPath));
+      }
       break;
-    case 'bz2':
-      await new Promise((res, rej) => {
-        fs.createReadStream(compressedPath).pipe(zlib.createBrotliDecompress())
-          .pipe(fs.createWriteStream(outputPath)).on('finish', res).on('error', rej);
-      });
+    }
+    case 'bz2': {
+      const bz2Size = fs.statSync(compressedPath).size;
+      if (bz2Size < 65536) {
+        fs.writeFileSync(outputPath, zlib.brotliDecompressSync(fs.readFileSync(compressedPath)));
+      } else {
+        await pipeline(fs.createReadStream(compressedPath), zlib.createBrotliDecompress(), fs.createWriteStream(outputPath));
+      }
       break;
+    }
     case 'zst': {
       if (!zstdWasm) throw new Error('@bokuweb/zstd-wasm not installed — run: npm install @bokuweb/zstd-wasm');
       const data = fs.readFileSync(compressedPath);
