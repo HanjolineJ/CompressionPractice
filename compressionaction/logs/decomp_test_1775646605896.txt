@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\precompressed_asset.bin
+Original hash: 60786ceac7861bb8e7bee6db75a5baf8aad3e668819e826cd43e312f264a6f4f
+
+Processing: precompressed_asset.bin.lz4
+  Tool: lz4
+  Compressed size: 204823 bytes
+  Decompressed to: precompressed_asset.bin_from_lz4.txt
+  Decompressed size: 204804 bytes
+  Hash match: YES - USABLE
+
+Processing: precompressed_asset.bin.gz
+  Tool: gz
+  Compressed size: 204887 bytes
+  Decompressed to: precompressed_asset.bin_from_gz.txt
+  Decompressed size: 204804 bytes
+  Hash match: YES - USABLE
+
+Processing: precompressed_asset.bin.bz2
+  Tool: bz2
+  Compressed size: 204809 bytes
+  Decompressed to: precompressed_asset.bin_from_bz2.txt
+  Decompressed size: 204804 bytes
+  Hash match: YES - USABLE
+
+Processing: precompressed_asset.bin.xz
+  Tool: xz
+  Compressed size: 207604 bytes
+  Decompressed to: precompressed_asset.bin_from_xz.txt
+  Decompressed size: 204804 bytes
+  Hash match: YES - USABLE
+
+Processing: precompressed_asset.bin.zst
+  Tool: zst
+  Compressed size: 204819 bytes
+  Decompressed to: precompressed_asset.bin_from_zst.txt
+  Decompressed size: 204804 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

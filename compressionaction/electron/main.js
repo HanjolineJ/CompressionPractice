@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { runCompressionJob, findRecentCompressedFiles, runDecompressionJob, runBatchDecompressionJob } from '../src/backend/compressRunner.js';
+import { getRecommendation, getRecommendationFromBenchmark } from '../src/backend/mlPredictor.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -152,3 +153,32 @@ ipcMain.handle('load-image-as-data-url', async (_evt, imagePath) => {
   }
 });
 
+// ── ML prediction handlers ────────────────────────────────────────────────────
+
+// Pre-run prediction: called right after the user picks a file, before compression.
+// Uses only file size, extension, and Shannon entropy.
+ipcMain.handle('ml-predict', async (_evt, filePath) => {
+  console.log('[ml-predict] requesting prediction for:', filePath);
+  try {
+    const result = await getRecommendation(filePath);
+    console.log('[ml-predict] result:', result);
+    return result;
+  } catch (error) {
+    console.error('[ml-predict] error:', error);
+    return { error: error.message };
+  }
+});
+
+// Post-run prediction: called after compression finishes with real benchmark data.
+// Uses actual per-algorithm savings + timing from the completed benchmark run.
+ipcMain.handle('ml-predict-from-benchmark', async (_evt, { filePath, rows }) => {
+  console.log('[ml-predict-from-benchmark] requesting post-run prediction for:', filePath);
+  try {
+    const result = await getRecommendationFromBenchmark(filePath, rows);
+    console.log('[ml-predict-from-benchmark] result:', result);
+    return result;
+  } catch (error) {
+    console.error('[ml-predict-from-benchmark] error:', error);
+    return { error: error.message };
+  }
+});

@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\random_binary_512kb.bin
+Original hash: 426361a7b8141651c0e9ca5d93e7c7feb0ce18cef6249547eb5643741390d898
+
+Processing: random_binary_512kb.bin.lz4
+  Tool: lz4
+  Compressed size: 524307 bytes
+  Decompressed to: random_binary_512kb.bin_from_lz4.txt
+  Decompressed size: 524288 bytes
+  Hash match: YES - USABLE
+
+Processing: random_binary_512kb.bin.gz
+  Tool: gz
+  Compressed size: 524468 bytes
+  Decompressed to: random_binary_512kb.bin_from_gz.txt
+  Decompressed size: 524288 bytes
+  Hash match: YES - USABLE
+
+Processing: random_binary_512kb.bin.bz2
+  Tool: bz2
+  Compressed size: 524293 bytes
+  Decompressed to: random_binary_512kb.bin_from_bz2.txt
+  Decompressed size: 524288 bytes
+  Hash match: YES - USABLE
+
+Processing: random_binary_512kb.bin.xz
+  Tool: xz
+  Compressed size: 531501 bytes
+  Decompressed to: random_binary_512kb.bin_from_xz.txt
+  Decompressed size: 524288 bytes
+  Hash match: YES - USABLE
+
+Processing: random_binary_512kb.bin.zst
+  Tool: zst
+  Compressed size: 524309 bytes
+  Decompressed to: random_binary_512kb.bin_from_zst.txt
+  Decompressed size: 524288 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\game_config.lua
+Original hash: 87b5b071dc6eca1b473e9858c33c9f610e334eebb4e79debd3d6363cf48558ef
+
+Processing: game_config.lua.lz4
+  Tool: lz4
+  Compressed size: 583 bytes
+  Decompressed to: game_config.lua_from_lz4.txt
+  Decompressed size: 839 bytes
+  Hash match: YES - USABLE
+
+Processing: game_config.lua.gz
+  Tool: gz
+  Compressed size: 432 bytes
+  Decompressed to: game_config.lua_from_gz.txt
+  Decompressed size: 839 bytes
+  Hash match: YES - USABLE
+
+Processing: game_config.lua.bz2
+  Tool: bz2
+  Compressed size: 355 bytes
+  Decompressed to: game_config.lua_from_bz2.txt
+  Decompressed size: 839 bytes
+  Hash match: YES - USABLE
+
+Processing: game_config.lua.xz
+  Tool: xz
+  Compressed size: 423 bytes
+  Decompressed to: game_config.lua_from_xz.txt
+  Decompressed size: 839 bytes
+  Hash match: YES - USABLE
+
+Processing: game_config.lua.zst
+  Tool: zst
+  Compressed size: 431 bytes
+  Decompressed to: game_config.lua_from_zst.txt
+  Decompressed size: 839 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

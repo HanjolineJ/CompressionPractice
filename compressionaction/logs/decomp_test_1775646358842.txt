@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\engine_source_large.c
+Original hash: 0716d39db53fbc60f422d1eca14f33064a371c5feedccbce346d27ce7b67bd35
+
+Processing: engine_source_large.c.lz4
+  Tool: lz4
+  Compressed size: 67730 bytes
+  Decompressed to: engine_source_large.c_from_lz4.txt
+  Decompressed size: 307200 bytes
+  Hash match: YES - USABLE
+
+Processing: engine_source_large.c.gz
+  Tool: gz
+  Compressed size: 30752 bytes
+  Decompressed to: engine_source_large.c_from_gz.txt
+  Decompressed size: 307200 bytes
+  Hash match: YES - USABLE
+
+Processing: engine_source_large.c.bz2
+  Tool: bz2
+  Compressed size: 25354 bytes
+  Decompressed to: engine_source_large.c_from_bz2.txt
+  Decompressed size: 307200 bytes
+  Hash match: YES - USABLE
+
+Processing: engine_source_large.c.xz
+  Tool: xz
+  Compressed size: 24771 bytes
+  Decompressed to: engine_source_large.c_from_xz.txt
+  Decompressed size: 307200 bytes
+  Hash match: YES - USABLE
+
+Processing: engine_source_large.c.zst
+  Tool: zst
+  Compressed size: 25289 bytes
+  Decompressed to: engine_source_large.c_from_zst.txt
+  Decompressed size: 307200 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

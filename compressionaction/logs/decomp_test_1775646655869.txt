@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\voxel_world_chunks.bin
+Original hash: b9a64ffa45c848ff2b1e3b1e8dadddfbce233ed19aa6188f11960d2188136ebf
+
+Processing: voxel_world_chunks.bin.lz4
+  Tool: lz4
+  Compressed size: 26151 bytes
+  Decompressed to: voxel_world_chunks.bin_from_lz4.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: voxel_world_chunks.bin.gz
+  Tool: gz
+  Compressed size: 7658 bytes
+  Decompressed to: voxel_world_chunks.bin_from_gz.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: voxel_world_chunks.bin.bz2
+  Tool: bz2
+  Compressed size: 6636 bytes
+  Decompressed to: voxel_world_chunks.bin_from_bz2.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: voxel_world_chunks.bin.xz
+  Tool: xz
+  Compressed size: 6938 bytes
+  Decompressed to: voxel_world_chunks.bin_from_xz.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: voxel_world_chunks.bin.zst
+  Tool: zst
+  Compressed size: 6903 bytes
+  Decompressed to: voxel_world_chunks.bin_from_zst.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

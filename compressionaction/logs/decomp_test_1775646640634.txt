@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\synthetic_map.wad
+Original hash: 128462ff330c0d3fa95856236780c63a99dfebb4747a09e7416d84a67b3c2507
+
+Processing: synthetic_map.wad.lz4
+  Tool: lz4
+  Compressed size: 13807 bytes
+  Decompressed to: synthetic_map.wad_from_lz4.txt
+  Decompressed size: 16548 bytes
+  Hash match: YES - USABLE
+
+Processing: synthetic_map.wad.gz
+  Tool: gz
+  Compressed size: 12509 bytes
+  Decompressed to: synthetic_map.wad_from_gz.txt
+  Decompressed size: 16548 bytes
+  Hash match: YES - USABLE
+
+Processing: synthetic_map.wad.bz2
+  Tool: bz2
+  Compressed size: 11485 bytes
+  Decompressed to: synthetic_map.wad_from_bz2.txt
+  Decompressed size: 16548 bytes
+  Hash match: YES - USABLE
+
+Processing: synthetic_map.wad.xz
+  Tool: xz
+  Compressed size: 11722 bytes
+  Decompressed to: synthetic_map.wad_from_xz.txt
+  Decompressed size: 16548 bytes
+  Hash match: YES - USABLE
+
+Processing: synthetic_map.wad.zst
+  Tool: zst
+  Compressed size: 12083 bytes
+  Decompressed to: synthetic_map.wad_from_zst.txt
+  Decompressed size: 16548 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

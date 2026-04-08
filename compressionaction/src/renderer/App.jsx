@@ -8,6 +8,115 @@ function prettyBytes(n) {
   return `${v.toFixed(2)} ${units[i]}`;
 }
 
+// ── ML Recommendation Panel ──────────────────────────────────────────────────
+// Renders algorithm, confidence bar, and per-class probability breakdown.
+function MlRecommendationPanel({ prediction, label }) {
+  const { algorithm, confidence, confident, scores, fileStats } = prediction;
+  const algoColors = {
+    zstd:  '#4f8cff',
+    lz4:   '#51cf66',
+    bzip2: '#ffd93d',
+    gzip:  '#ff9f43',
+    xz:    '#c084fc',
+  };
+  const allAlgos = ['zstd', 'lz4', 'bzip2', 'gzip', 'xz'];
+
+  return (
+    <div>
+      {/* Top row: recommended algorithm + confidence */}
+      <div style={{display:'flex', alignItems:'center', gap:16, marginBottom:14, flexWrap:'wrap'}}>
+        <div style={{
+          background: algoColors[algorithm] || '#888',
+          color: '#0b0d10',
+          fontWeight: 700,
+          fontSize: 20,
+          padding: '8px 20px',
+          borderRadius: 10,
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+        }}>
+          {algorithm}
+        </div>
+        <div>
+          <div style={{fontSize:13, opacity:0.7, marginBottom:3}}>{label}</div>
+          <div style={{display:'flex', alignItems:'center', gap:8}}>
+            <div style={{
+              width: 120,
+              height: 8,
+              background: '#1e2633',
+              borderRadius: 4,
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                width: `${Math.round(confidence * 100)}%`,
+                height: '100%',
+                background: confident ? '#51cf66' : '#ffd93d',
+                borderRadius: 4,
+                transition: 'width 0.4s ease',
+              }}/>
+            </div>
+            <span style={{fontSize:13, fontWeight:600, color: confident ? '#51cf66' : '#ffd93d'}}>
+              {Math.round(confidence * 100)}%
+            </span>
+            {!confident && (
+              <span style={{fontSize:11, opacity:0.6}}>(low confidence — run all)</span>
+            )}
+          </div>
+        </div>
+        {fileStats && (
+          <div style={{fontSize:12, opacity:0.55, marginLeft:'auto'}}>
+            {(fileStats.src_bytes / 1024).toFixed(1)} KB
+            {fileStats.file_ext && fileStats.file_ext !== 'unknown' ? ` · .${fileStats.file_ext}` : ''}
+            {fileStats.shannon_entropy != null ? ` · ${fileStats.shannon_entropy} bits/byte` : ''}
+          </div>
+        )}
+      </div>
+
+      {/* Per-algorithm probability bars */}
+      {scores && (
+        <div style={{display:'flex', flexDirection:'column', gap:6}}>
+          {allAlgos
+            .filter(a => scores[a] != null)
+            .sort((a, b) => scores[b] - scores[a])
+            .map(algo => (
+              <div key={algo} style={{display:'flex', alignItems:'center', gap:8}}>
+                <span style={{
+                  width: 52,
+                  fontSize: 12,
+                  fontWeight: algo === algorithm ? 700 : 400,
+                  color: algoColors[algo] || '#888',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}>
+                  {algo}
+                </span>
+                <div style={{flex:1, height:6, background:'#1e2633', borderRadius:3, overflow:'hidden'}}>
+                  <div style={{
+                    width: `${Math.round(scores[algo] * 100)}%`,
+                    height: '100%',
+                    background: algo === algorithm ? (algoColors[algo] || '#4f8cff') : '#2a3a4a',
+                    borderRadius: 3,
+                    transition: 'width 0.4s ease',
+                  }}/>
+                </div>
+                <span style={{
+                  width: 36,
+                  fontSize: 12,
+                  textAlign: 'right',
+                  fontWeight: algo === algorithm ? 700 : 400,
+                  opacity: algo === algorithm ? 1 : 0.55,
+                }}>
+                  {Math.round(scores[algo] * 100)}%
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [inputPath, setInputPath] = useState('');
   const [outputDir, setOutputDir] = useState('');
@@ -27,6 +136,9 @@ export default function App() {
   const [decompResults, setDecompResults] = useState([]);
   const [compGraphDataUrl, setCompGraphDataUrl] = useState('');
   const [decompGraphDataUrl, setDecompGraphDataUrl] = useState('');
+  const [mlPrediction, setMlPrediction] = useState(null);      // pre-run prediction
+  const [mlPostRun, setMlPostRun] = useState(null);             // post-run prediction
+  const [mlLoading, setMlLoading] = useState(false);
 
   useEffect(() => {
     // Debug: Check if API is available
@@ -49,7 +161,21 @@ export default function App() {
       console.log('Calling pickInputFile...');
       const p = await window.compressAPI.pickInputFile();
       console.log('Result:', p);
-      if (p) setInputPath(p);
+      if (p) {
+        setInputPath(p);
+        setMlPrediction(null);
+        setMlPostRun(null);
+        // Fire prediction immediately — user sees a recommendation before clicking Run
+        setMlLoading(true);
+        try {
+          const pred = await window.compressAPI.mlPredict(p);
+          setMlPrediction(pred);
+        } catch (e) {
+          console.warn('ML pre-run prediction failed:', e.message);
+        } finally {
+          setMlLoading(false);
+        }
+      }
     } catch (error) {
       console.error('Error picking input file:', error);
       alert('Error opening file dialog: ' + error.message);
@@ -74,12 +200,20 @@ export default function App() {
 
   const run = async () => {
     if (!inputPath || !outputDir) return;
-    setRunning(true); setRows([]); setCsvPath(''); setGraphPath(''); setShowDecompress(false);
+    setRunning(true); setRows([]); setCsvPath(''); setGraphPath(''); setShowDecompress(false); setMlPostRun(null);
     try {
       const res = await window.compressAPI.runJob({ inputPath, outputDir, tools });
       setRows(res.rows || []);
       setCsvPath(res.csvPath || '');
       setGraphPath(res.graphPath || '');
+
+      // Post-run prediction using real benchmark data
+      try {
+        const postPred = await window.compressAPI.mlPredictFromBenchmark(inputPath, res.rows || []);
+        setMlPostRun(postPred);
+      } catch (e) {
+        console.warn('ML post-run prediction failed:', e.message);
+      }
       
       // Load compression graph as data URL for display
       if (res.graphPath) {
@@ -208,9 +342,19 @@ export default function App() {
                   const files = Array.from(e.dataTransfer?.files || []);
                   if (files.length > 0) {
                     const file = files[0];
-                    // In Electron, file.path is available directly
                     if (file.path) {
                       setInputPath(file.path);
+                      setMlPrediction(null);
+                      setMlPostRun(null);
+                      setMlLoading(true);
+                      try {
+                        const pred = await window.compressAPI.mlPredict(file.path);
+                        setMlPrediction(pred);
+                      } catch (e) {
+                        console.warn('ML pre-run prediction failed:', e.message);
+                      } finally {
+                        setMlLoading(false);
+                      }
                     }
                   }
                 }}
@@ -275,6 +419,25 @@ export default function App() {
             <button onClick={pickOut} style={btn()}>Choose</button>
           </div>
         </div>
+
+        {/* ML Recommendation Card — appears after file is selected */}
+        {(mlLoading || mlPrediction) && (
+          <div style={{background:'#12161c', borderRadius:16, padding:16, marginBottom:16, boxShadow:'0 10px 30px rgba(0,0,0,0.35)', border: '1px solid #1e2633'}}>
+            <h2 style={{fontSize:18, fontWeight:700, marginBottom:8}}>ML Recommendation</h2>
+            {mlLoading ? (
+              <div style={{display:'flex', alignItems:'center', gap:10, opacity:0.7}}>
+                <span style={{fontSize:13}}>Analysing file with Random Forest model…</span>
+              </div>
+            ) : mlPrediction?.error ? (
+              <div style={{fontSize:13, color:'#ffd93d'}}>
+                <span style={{fontWeight:600}}>Model unavailable:</span> {mlPrediction.error}
+                <div style={{marginTop:6, opacity:0.7}}>Run all algorithms and compare by usability score.</div>
+              </div>
+            ) : mlPrediction && (
+              <MlRecommendationPanel prediction={mlPrediction} label="Pre-run estimate" />
+            )}
+          </div>
+        )}
 
         {/* Card 2: Algorithms (like imager "settings") */}
         <div style={{background:'#12161c', borderRadius:16, padding:16, marginBottom:16, boxShadow:'0 10px 30px rgba(0,0,0,0.35)'}}>
@@ -388,6 +551,17 @@ export default function App() {
             </div>
           )}
         </div>
+
+        {/* ML Post-Run Recommendation — appears after benchmark completes */}
+        {mlPostRun && !mlPostRun.error && (
+          <div style={{background:'#12161c', borderRadius:16, padding:16, marginBottom:16, boxShadow:'0 10px 30px rgba(0,0,0,0.35)', border:'1px solid #2a3a2a'}}>
+            <h2 style={{fontSize:18, fontWeight:700, marginBottom:8}}>ML Recommendation (post-run)</h2>
+            <p style={{fontSize:13, opacity:0.7, marginBottom:12}}>
+              Trained on your actual benchmark results — more accurate than the pre-run estimate.
+            </p>
+            <MlRecommendationPanel prediction={mlPostRun} label="Based on real benchmark data" />
+          </div>
+        )}
 
         {/* Card 4: Decompression (appears after compression) */}
         {showDecompress && (

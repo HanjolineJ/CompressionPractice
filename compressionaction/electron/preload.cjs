@@ -14,5 +14,7 @@ contextBridge.exposeInMainWorld('compressAPI', {
   findRecentFiles: (outputDir) => ipcRenderer.invoke('find-recent-files', outputDir),
   runDecompress: (payload) => ipcRenderer.invoke('run-decompress', payload),
   runBatchDecompress: (payload) => ipcRenderer.invoke('run-batch-decompress', payload),
-  loadImageAsDataUrl: (imagePath) => ipcRenderer.invoke('load-image-as-data-url', imagePath)
+  loadImageAsDataUrl: (imagePath) => ipcRenderer.invoke('load-image-as-data-url', imagePath),
+  mlPredict: (filePath) => ipcRenderer.invoke('ml-predict', filePath),
+  mlPredictFromBenchmark: (filePath, rows) => ipcRenderer.invoke('ml-predict-from-benchmark', { filePath, rows })
 });

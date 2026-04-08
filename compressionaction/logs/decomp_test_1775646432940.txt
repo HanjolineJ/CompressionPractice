@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\game_inventory_data.json
+Original hash: 3c9314ce9e58fa4f63dca3c02d8fc761507a5421cb14086ecc4d67fe95f770ab
+
+Processing: game_inventory_data.json.lz4
+  Tool: lz4
+  Compressed size: 57784 bytes
+  Decompressed to: game_inventory_data.json_from_lz4.txt
+  Decompressed size: 306907 bytes
+  Hash match: YES - USABLE
+
+Processing: game_inventory_data.json.gz
+  Tool: gz
+  Compressed size: 23307 bytes
+  Decompressed to: game_inventory_data.json_from_gz.txt
+  Decompressed size: 306907 bytes
+  Hash match: YES - USABLE
+
+Processing: game_inventory_data.json.bz2
+  Tool: bz2
+  Compressed size: 19284 bytes
+  Decompressed to: game_inventory_data.json_from_bz2.txt
+  Decompressed size: 306907 bytes
+  Hash match: YES - USABLE
+
+Processing: game_inventory_data.json.xz
+  Tool: xz
+  Compressed size: 19688 bytes
+  Decompressed to: game_inventory_data.json_from_xz.txt
+  Decompressed size: 306907 bytes
+  Hash match: YES - USABLE
+
+Processing: game_inventory_data.json.zst
+  Tool: zst
+  Compressed size: 20248 bytes
+  Decompressed to: game_inventory_data.json_from_zst.txt
+  Decompressed size: 306907 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0
