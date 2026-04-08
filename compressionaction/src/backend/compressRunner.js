@@ -9,16 +9,18 @@ const _require = createRequire(import.meta.url);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pure-JS library availability check
-// Run `npm install fzstd lz4js lzma-purejs` once before starting the app.
+// Run `npm install @bokuweb/zstd-wasm lz4js lzma-purejs` once before starting the app.
 // ─────────────────────────────────────────────────────────────────────────────
-let fzstd = null;
+let zstdWasm = null;   // @bokuweb/zstd-wasm — compress + decompress
 let lz4js = null;
 let lzmajs = null;
 
 try {
-  fzstd = await import('fzstd');
+  const mod = await import('@bokuweb/zstd-wasm');
+  await mod.init();          // initialise the WASM binary once at startup
+  zstdWasm = mod;
 } catch {
-  console.warn('[compressRunner] fzstd not installed — zstd will be skipped. Run: npm install fzstd');
+  console.warn('[compressRunner] @bokuweb/zstd-wasm not installed — zstd will be skipped. Run: npm install @bokuweb/zstd-wasm');
 }
 
 try {
@@ -152,15 +154,16 @@ async function compressBzip2(inputPath) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// zstd — fzstd (pure-JS WebAssembly, REAL Zstandard algorithm)
-// Level 19 is near-maximum ratio. Max is 22 but gets slow for large files.
-// Install: npm install fzstd
+// zstd — @bokuweb/zstd-wasm (WebAssembly, REAL Zstandard, compress + decompress)
+// API: init(), compress(buffer, level), decompress(buffer)
+// Level 19 = near-maximum ratio (max 22, gets slow).
+// Install: npm install @bokuweb/zstd-wasm
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function compressZstd(inputPath) {
-  if (!fzstd) {
-    return { tool: 'zstd', error: false, skipped: true, reason: 'fzstd_not_installed',
-             message: 'Run: npm install fzstd' };
+  if (!zstdWasm) {
+    return { tool: 'zstd', error: false, skipped: true, reason: 'zstd_wasm_not_installed',
+             message: 'Run: npm install @bokuweb/zstd-wasm' };
   }
   try {
     const originalHash = await getFileHash(inputPath);
@@ -168,16 +171,16 @@ async function compressZstd(inputPath) {
     const outPath = inputPath + '.zst';
 
     const t0 = process.hrtime.bigint();
-    const compressed = fzstd.compress(new Uint8Array(srcBytes), 19);
+    const compressed = zstdWasm.compress(srcBytes, 19);
     writeBytesToFile(outPath, compressed);
     const compressTime = Number(process.hrtime.bigint() - t0) / 1e6;
 
     const t1 = process.hrtime.bigint();
-    const decompressedBytes = fzstd.decompress(compressed);
+    const decompressedBytes = zstdWasm.decompress(compressed);
     const decompressTime = Number(process.hrtime.bigint() - t1) / 1e6;
 
     const decompressedPath = inputPath + '.zst.decompressed';
-    writeBytesToFile(decompressedPath, decompressedBytes);
+    writeBytesToFile(decompressedPath, Buffer.from(decompressedBytes));
     const decompressedHash = await getFileHash(decompressedPath);
     fs.unlinkSync(decompressedPath);
 
@@ -244,10 +247,36 @@ async function compressLz4(inputPath) {
 // Install: npm install lzma-purejs
 // ─────────────────────────────────────────────────────────────────────────────
 
+// lzma-purejs is synchronous and loads the entire file into memory.
+// It is reliable up to ~20 MB. Beyond that, skip gracefully rather than crash.
+const LZMA_MAX_BYTES = 20 * 1024 * 1024; // 20 MB
+
+// LZMA raw format magic: first byte is a properties byte in range 0x00–0xE0,
+// followed by 4-byte dict size and 8-byte uncompressed size.
+// The most reliable single-byte signal is that props byte 0x5D is by far the
+// most common output from lzma-purejs (lc=3,lp=0,pb=2). We also accept the
+// full valid range 0x00–0xE0 but reject anything that matches a deflate zlib
+// header (0x78 __) which is what the old deflate-proxy produced.
+function isLzmaRaw(buf) {
+  if (buf.length < 13) return false;
+  const props = buf[0];
+  // Deflate/zlib headers: 0x78 0x01, 0x78 0x9C, 0x78 0xDA — all start with 0x78
+  if (props === 0x78) return false;
+  // Valid LZMA props byte encodes lc, lp, pb as: props = (pb*5 + lp)*9 + lc
+  // Max value: pb=4, lp=4, lc=8 → (4*5+4)*9+8 = 224 = 0xE0
+  if (props > 0xE0) return false;
+  return true;
+}
+
 async function compressXz(inputPath) {
   if (!lzmajs) {
     return { tool: 'xz', error: false, skipped: true, reason: 'lzma_purejs_not_installed',
              message: 'Run: npm install lzma-purejs' };
+  }
+  const fileSize = fs.statSync(inputPath).size;
+  if (fileSize > LZMA_MAX_BYTES) {
+    return { tool: 'xz', error: false, skipped: true, reason: 'file_too_large_for_js_lzma',
+             message: `File is ${(fileSize/1024/1024).toFixed(1)} MB — lzma-purejs is limited to ${LZMA_MAX_BYTES/1024/1024} MB to avoid memory crashes. Install the xz CLI binary for large file support.` };
   }
   try {
     const originalHash = await getFileHash(inputPath);
@@ -379,9 +408,9 @@ async function decompressFile(compressedPath, outputPath, tool) {
       });
       break;
     case 'zst': {
-      if (!fzstd) throw new Error('fzstd not installed — run: npm install fzstd');
+      if (!zstdWasm) throw new Error('@bokuweb/zstd-wasm not installed — run: npm install @bokuweb/zstd-wasm');
       const data = fs.readFileSync(compressedPath);
-      fs.writeFileSync(outputPath, Buffer.from(fzstd.decompress(new Uint8Array(data))));
+      fs.writeFileSync(outputPath, Buffer.from(zstdWasm.decompress(data)));
       break;
     }
     case 'lz4': {
@@ -393,7 +422,14 @@ async function decompressFile(compressedPath, outputPath, tool) {
     }
     case 'xz': {
       if (!lzmajs) throw new Error('lzma-purejs not installed — run: npm install lzma-purejs');
+      const fileSize = fs.statSync(compressedPath).size;
+      if (fileSize > LZMA_MAX_BYTES) {
+        throw new Error(`File too large for JS LZMA decompressor (${(fileSize/1024/1024).toFixed(1)} MB > ${LZMA_MAX_BYTES/1024/1024} MB limit). This file was likely compressed with the old deflate proxy — re-run compression to get a valid .xz file.`);
+      }
       const data = fs.readFileSync(compressedPath);
+      if (!isLzmaRaw(data)) {
+        throw new Error('Not a valid LZMA file — this .xz was created by the old deflate proxy and cannot be decompressed. Re-run compression on the original file to generate a real .xz.');
+      }
       const decompressed = lzmajs.decompressFile(data);
       fs.writeFileSync(outputPath, Buffer.from(decompressed));
       break;
