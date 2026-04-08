@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_info.csv
+Original hash: c2e296531e95668570d5b814d0c4ccaff4473a63b3ead8a3ccf513aadeb2d3eb
+
+Processing: game_info.csv.lz4
+  Tool: lz4
+  Compressed size: 21267014 bytes
+  Decompressed to: game_info.csv_from_lz4.txt
+  Decompressed size: 76026847 bytes
+  Hash match: YES - USABLE
+
+Processing: game_info.csv.gz
+  Tool: gz
+  Compressed size: 21267026 bytes
+  Decompressed to: game_info.csv_from_gz.txt
+  Decompressed size: 76026847 bytes
+  Hash match: YES - USABLE
+
+Processing: game_info.csv.bz2
+  Tool: bz2
+  Compressed size: 15703685 bytes
+  Decompressed to: game_info.csv_from_bz2.txt
+  Decompressed size: 76026847 bytes
+  Hash match: YES - USABLE
+
+Processing: game_info.csv.xz
+  Tool: xz
+  Compressed size: 21267014 bytes
+  Decompressed to: game_info.csv_from_xz.txt
+  Decompressed size: 76026847 bytes
+  Hash match: YES - USABLE
+
+Processing: game_info.csv.zst
+  Tool: zst
+  Compressed size: 21267014 bytes
+  Decompressed to: game_info.csv_from_zst.txt
+  Decompressed size: 76026847 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

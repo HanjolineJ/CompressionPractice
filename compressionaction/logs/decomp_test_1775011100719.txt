@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/black_lab_sara copy.png
+Original hash: 303165f3851d798f708f6897b8fdf2298ae897bb93921af3efae1daafd697c55
+
+Processing: black_lab_sara copy.png.bz2
+  Tool: bz2
+  Compressed size: 225946 bytes
+  Decompressed to: black_lab_sara copy.png_from_bz2.txt
+  Decompressed size: 229303 bytes
+  Hash match: YES - USABLE
+
+Processing: black_lab_sara copy.png.gz
+  Tool: gz
+  Compressed size: 229391 bytes
+  Decompressed to: black_lab_sara copy.png_from_gz.txt
+  Decompressed size: 229303 bytes
+  Hash match: YES - USABLE
+
+Processing: black_lab_sara copy.png.lz4
+  Tool: lz4
+  Compressed size: 229379 bytes
+  Decompressed to: black_lab_sara copy.png_from_lz4.txt
+  Decompressed size: 229303 bytes
+  Hash match: YES - USABLE
+
+Processing: black_lab_sara copy.png.xz
+  Tool: xz
+  Compressed size: 229379 bytes
+  Decompressed to: black_lab_sara copy.png_from_xz.txt
+  Decompressed size: 229303 bytes
+  Hash match: YES - USABLE
+
+Processing: black_lab_sara copy.png.zst
+  Tool: zst
+  Compressed size: 229379 bytes
+  Decompressed to: black_lab_sara copy.png_from_zst.txt
+  Decompressed size: 229303 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

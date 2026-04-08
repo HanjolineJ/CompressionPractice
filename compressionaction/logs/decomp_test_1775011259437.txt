@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/rabbit-june5_2006-img_0075.png
+Original hash: ea1c66244f713ce601b940c244d19f6934ea00d4618aa0e2d3b7490c3dd86d22
+
+Processing: rabbit-june5_2006-img_0075.png.bz2
+  Tool: bz2
+  Compressed size: 234060 bytes
+  Decompressed to: rabbit-june5_2006-img_0075.png_from_bz2.txt
+  Decompressed size: 234055 bytes
+  Hash match: YES - USABLE
+
+Processing: rabbit-june5_2006-img_0075.png.gz
+  Tool: gz
+  Compressed size: 233854 bytes
+  Decompressed to: rabbit-june5_2006-img_0075.png_from_gz.txt
+  Decompressed size: 234055 bytes
+  Hash match: YES - USABLE
+
+Processing: rabbit-june5_2006-img_0075.png.lz4
+  Tool: lz4
+  Compressed size: 233842 bytes
+  Decompressed to: rabbit-june5_2006-img_0075.png_from_lz4.txt
+  Decompressed size: 234055 bytes
+  Hash match: YES - USABLE
+
+Processing: rabbit-june5_2006-img_0075.png.xz
+  Tool: xz
+  Compressed size: 233842 bytes
+  Decompressed to: rabbit-june5_2006-img_0075.png_from_xz.txt
+  Decompressed size: 234055 bytes
+  Hash match: YES - USABLE
+
+Processing: rabbit-june5_2006-img_0075.png.zst
+  Tool: zst
+  Compressed size: 233842 bytes
+  Decompressed to: rabbit-june5_2006-img_0075.png_from_zst.txt
+  Decompressed size: 234055 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

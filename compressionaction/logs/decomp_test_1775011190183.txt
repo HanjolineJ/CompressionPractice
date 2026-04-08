@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/goat2-s7003128.png
+Original hash: 469fd369879e47e591259631419073971242bd2f591dd425a22422039d371513
+
+Processing: goat2-s7003128.png.bz2
+  Tool: bz2
+  Compressed size: 212682 bytes
+  Decompressed to: goat2-s7003128.png_from_bz2.txt
+  Decompressed size: 212677 bytes
+  Hash match: YES - USABLE
+
+Processing: goat2-s7003128.png.gz
+  Tool: gz
+  Compressed size: 212017 bytes
+  Decompressed to: goat2-s7003128.png_from_gz.txt
+  Decompressed size: 212677 bytes
+  Hash match: YES - USABLE
+
+Processing: goat2-s7003128.png.lz4
+  Tool: lz4
+  Compressed size: 212005 bytes
+  Decompressed to: goat2-s7003128.png_from_lz4.txt
+  Decompressed size: 212677 bytes
+  Hash match: YES - USABLE
+
+Processing: goat2-s7003128.png.xz
+  Tool: xz
+  Compressed size: 212005 bytes
+  Decompressed to: goat2-s7003128.png_from_xz.txt
+  Decompressed size: 212677 bytes
+  Hash match: YES - USABLE
+
+Processing: goat2-s7003128.png.zst
+  Tool: zst
+  Compressed size: 212005 bytes
+  Decompressed to: goat2-s7003128.png_from_zst.txt
+  Decompressed size: 212677 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/frames.edf
+Original hash: 8d987c94486fdcbd691fe9255b75a35299a73a5e95421fb6165876cba3632c6b
+
+Processing: frames.edf.bz2
+  Tool: bz2
+  Compressed size: 12062 bytes
+  Decompressed to: frames.edf_from_bz2.txt
+  Decompressed size: 269533 bytes
+  Hash match: YES - USABLE
+
+Processing: frames.edf.gz
+  Tool: gz
+  Compressed size: 25189 bytes
+  Decompressed to: frames.edf_from_gz.txt
+  Decompressed size: 269533 bytes
+  Hash match: YES - USABLE
+
+Processing: frames.edf.lz4
+  Tool: lz4
+  Compressed size: 25177 bytes
+  Decompressed to: frames.edf_from_lz4.txt
+  Decompressed size: 269533 bytes
+  Hash match: YES - USABLE
+
+Processing: frames.edf.xz
+  Tool: xz
+  Compressed size: 25177 bytes
+  Decompressed to: frames.edf_from_xz.txt
+  Decompressed size: 269533 bytes
+  Hash match: YES - USABLE
+
+Processing: frames.edf.zst
+  Tool: zst
+  Compressed size: 25177 bytes
+  Decompressed to: frames.edf_from_zst.txt
+  Decompressed size: 269533 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

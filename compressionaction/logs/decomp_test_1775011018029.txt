@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/eternity/base/doom/things.edf
+Original hash: 3a5a4f21a7dc8e251f62a5b8fff107418baf320fe49c2da7761d539941066ea9
+
+Processing: things.edf.lz4
+  Tool: lz4
+  Compressed size: 9306 bytes
+  Decompressed to: things.edf_from_lz4.txt
+  Decompressed size: 51413 bytes
+  Hash match: YES - USABLE
+
+Processing: things.edf.bz2
+  Tool: bz2
+  Compressed size: 7630 bytes
+  Decompressed to: things.edf_from_bz2.txt
+  Decompressed size: 51413 bytes
+  Hash match: YES - USABLE
+
+Processing: things.edf.gz
+  Tool: gz
+  Compressed size: 9318 bytes
+  Decompressed to: things.edf_from_gz.txt
+  Decompressed size: 51413 bytes
+  Hash match: YES - USABLE
+
+Processing: things.edf.xz
+  Tool: xz
+  Compressed size: 9306 bytes
+  Decompressed to: things.edf_from_xz.txt
+  Decompressed size: 51413 bytes
+  Hash match: YES - USABLE
+
+Processing: things.edf.zst
+  Tool: zst
+  Compressed size: 9306 bytes
+  Decompressed to: things.edf_from_zst.txt
+  Decompressed size: 51413 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

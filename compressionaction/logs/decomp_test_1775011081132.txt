@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/barkbase01.jpg
+Original hash: 1bb258eaefefb91f174e25dda1a1aebeaddc59f37b5657e0ab01edcf4747802a
+
+Processing: barkbase01.jpg.gz
+  Tool: gz
+  Compressed size: 206151 bytes
+  Decompressed to: barkbase01.jpg_from_gz.txt
+  Decompressed size: 206105 bytes
+  Hash match: YES - USABLE
+
+Processing: barkbase01.jpg.lz4
+  Tool: lz4
+  Compressed size: 206139 bytes
+  Decompressed to: barkbase01.jpg_from_lz4.txt
+  Decompressed size: 206105 bytes
+  Hash match: YES - USABLE
+
+Processing: barkbase01.jpg.bz2
+  Tool: bz2
+  Compressed size: 206110 bytes
+  Decompressed to: barkbase01.jpg_from_bz2.txt
+  Decompressed size: 206105 bytes
+  Hash match: YES - USABLE
+
+Processing: barkbase01.jpg.xz
+  Tool: xz
+  Compressed size: 206139 bytes
+  Decompressed to: barkbase01.jpg_from_xz.txt
+  Decompressed size: 206105 bytes
+  Hash match: YES - USABLE
+
+Processing: barkbase01.jpg.zst
+  Tool: zst
+  Compressed size: 206139 bytes
+  Decompressed to: barkbase01.jpg_from_zst.txt
+  Decompressed size: 206105 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

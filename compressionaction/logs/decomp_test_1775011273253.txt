@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/racoon-img_4367.png
+Original hash: b2fd22aff2c7d7dd0251390d3157c468c1f2921a34d54204d8ede6102402bd31
+
+Processing: racoon-img_4367.png.gz
+  Tool: gz
+  Compressed size: 62232 bytes
+  Decompressed to: racoon-img_4367.png_from_gz.txt
+  Decompressed size: 62194 bytes
+  Hash match: YES - USABLE
+
+Processing: racoon-img_4367.png.lz4
+  Tool: lz4
+  Compressed size: 62220 bytes
+  Decompressed to: racoon-img_4367.png_from_lz4.txt
+  Decompressed size: 62194 bytes
+  Hash match: YES - USABLE
+
+Processing: racoon-img_4367.png.bz2
+  Tool: bz2
+  Compressed size: 62198 bytes
+  Decompressed to: racoon-img_4367.png_from_bz2.txt
+  Decompressed size: 62194 bytes
+  Hash match: YES - USABLE
+
+Processing: racoon-img_4367.png.xz
+  Tool: xz
+  Compressed size: 62220 bytes
+  Decompressed to: racoon-img_4367.png_from_xz.txt
+  Decompressed size: 62194 bytes
+  Hash match: YES - USABLE
+
+Processing: racoon-img_4367.png.zst
+  Tool: zst
+  Compressed size: 62220 bytes
+  Decompressed to: racoon-img_4367.png_from_zst.txt
+  Decompressed size: 62194 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

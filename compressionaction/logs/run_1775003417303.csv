@@ -1,0 +1,2 @@
+tool,src_bytes,dst_bytes,ratio_saved,compress_ms,decompress_ms,verified,status
+gzip,1048576,498060,0.5250,17.784,5.053,yes,ok

@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/crispy-doom/CHANGELOG.md
+Original hash: 642d58cddc16de5931eff6311e87df32afd3e4fe53b50691ab8e7e95b9b0749b
+
+Processing: CHANGELOG.md.bz2
+  Tool: bz2
+  Compressed size: 1867 bytes
+  Decompressed to: CHANGELOG.md_from_bz2.txt
+  Decompressed size: 6471 bytes
+  Hash match: YES - USABLE
+
+Processing: CHANGELOG.md.gz
+  Tool: gz
+  Compressed size: 2276 bytes
+  Decompressed to: CHANGELOG.md_from_gz.txt
+  Decompressed size: 6471 bytes
+  Hash match: YES - USABLE
+
+Processing: CHANGELOG.md.lz4
+  Tool: lz4
+  Compressed size: 2264 bytes
+  Decompressed to: CHANGELOG.md_from_lz4.txt
+  Decompressed size: 6471 bytes
+  Hash match: YES - USABLE
+
+Processing: CHANGELOG.md.xz
+  Tool: xz
+  Compressed size: 2264 bytes
+  Decompressed to: CHANGELOG.md_from_xz.txt
+  Decompressed size: 6471 bytes
+  Hash match: YES - USABLE
+
+Processing: CHANGELOG.md.zst
+  Tool: zst
+  Compressed size: 2264 bytes
+  Decompressed to: CHANGELOG.md_from_zst.txt
+  Decompressed size: 6471 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0

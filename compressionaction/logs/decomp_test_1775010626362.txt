@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: /Users/hanjo/CompressionPractice/DataToTest/game_test_files/crispy-doom/src/doom/d_main.c
+Original hash: 6dd3658604fc1c093562bbb9c2d2e5a92401d81944e3a186745af85396ac17f6
+
+Processing: d_main.c.bz2
+  Tool: bz2
+  Compressed size: 15269 bytes
+  Decompressed to: d_main.c_from_bz2.txt
+  Decompressed size: 65708 bytes
+  Hash match: YES - USABLE
+
+Processing: d_main.c.gz
+  Tool: gz
+  Compressed size: 17743 bytes
+  Decompressed to: d_main.c_from_gz.txt
+  Decompressed size: 65708 bytes
+  Hash match: YES - USABLE
+
+Processing: d_main.c.lz4
+  Tool: lz4
+  Compressed size: 17731 bytes
+  Decompressed to: d_main.c_from_lz4.txt
+  Decompressed size: 65708 bytes
+  Hash match: YES - USABLE
+
+Processing: d_main.c.xz
+  Tool: xz
+  Compressed size: 17731 bytes
+  Decompressed to: d_main.c_from_xz.txt
+  Decompressed size: 65708 bytes
+  Hash match: YES - USABLE
+
+Processing: d_main.c.zst
+  Tool: zst
+  Compressed size: 17731 bytes
+  Decompressed to: d_main.c_from_zst.txt
+  Decompressed size: 65708 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total files tested: 5
+Successful: 5
+Failed: 0
