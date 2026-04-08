@@ -36,6 +36,9 @@ emit_error <- function(msg) {
   emit(list(error = msg))
 }
 
+# Null-coalescing helper — must be defined before first use
+`%||%` <- function(a, b) if (!is.null(a) && length(a) > 0 && !is.na(a[1])) a else b
+
 # ── 1. Parse arguments ────────────────────────────────────────────────────────
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 1) {
@@ -69,16 +72,17 @@ lz4_savings     <- as.numeric( params$lz4_savings      %||% mean_savings)
 xz_savings      <- as.numeric( params$xz_savings       %||% mean_savings)
 zstd_savings    <- as.numeric( params$zstd_savings     %||% mean_savings)
 
-# Null-coalescing helper (base R doesn't have %||%)
-`%||%` <- function(a, b) if (!is.null(a) && length(a) > 0 && !is.na(a[1])) a else b
-
-# Re-evaluate now that %||% is defined (for any NAs slipping through)
 if (is.na(shannon_entropy)) shannon_entropy <- NA_real_
 if (is.na(mean_savings))    mean_savings    <- 0.60
 
 # ── 2. Load the saved model bundle ───────────────────────────────────────────
-# predict_cli.R lives in MLFirstTry/ alongside rf_model_v3.rds
-script_dir   <- dirname(normalizePath(sys.frame(1)$ofile %||% ".", winslash = "/"))
+# Locate rf_model_v3.rds relative to this script using commandArgs.
+# sys.frame(1)$ofile does not work when called from Rscript on the command line.
+script_path  <- normalizePath(commandArgs(trailingOnly = FALSE) |>
+                  Filter(f = function(x) startsWith(x, "--file="), x = _) |>
+                  (\(x) if (length(x)) sub("--file=", "", x[1]) else "predict_cli.R")(),
+                mustWork = FALSE, winslash = "/")
+script_dir   <- dirname(script_path)
 model_path   <- file.path(script_dir, "rf_model_v3.rds")
 
 if (!file.exists(model_path)) {

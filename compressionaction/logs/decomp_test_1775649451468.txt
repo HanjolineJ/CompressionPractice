@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\audio_pcm_44100hz_1sec.raw
+Original hash: 586b5e6597ad0181fd52235a9a7d41b7801544985f29b2857c3cabd32217c6d4
+
+Processing: audio_pcm_44100hz_1sec.raw.lz4
+  Tool: lz4
+  Compressed size: 176419 bytes
+  Decompressed to: audio_pcm_44100hz_1sec.raw_from_lz4.txt
+  Decompressed size: 176400 bytes
+  Hash match: YES - USABLE
+
+Processing: audio_pcm_44100hz_1sec.raw.gz
+  Tool: gz
+  Compressed size: 163413 bytes
+  Decompressed to: audio_pcm_44100hz_1sec.raw_from_gz.txt
+  Decompressed size: 176400 bytes
+  Hash match: YES - USABLE
+
+Processing: audio_pcm_44100hz_1sec.raw.bz2
+  Tool: bz2
+  Compressed size: 161750 bytes
+  Decompressed to: audio_pcm_44100hz_1sec.raw_from_bz2.txt
+  Decompressed size: 176400 bytes
+  Hash match: YES - USABLE
+
+Processing: audio_pcm_44100hz_1sec.raw.xz
+  Tool: xz
+  Compressed size: 162776 bytes
+  Decompressed to: audio_pcm_44100hz_1sec.raw_from_xz.txt
+  Decompressed size: 176400 bytes
+  Hash match: YES - USABLE
+
+Processing: audio_pcm_44100hz_1sec.raw.zst
+  Tool: zst
+  Compressed size: 163343 bytes
+  Decompressed to: audio_pcm_44100hz_1sec.raw_from_zst.txt
+  Decompressed size: 176400 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

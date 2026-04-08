@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\noise_texture_256x256_rgba.raw
+Original hash: e53fa34e79accbd5245bb1d1a80bcbcb3f8a3377fa9ec86aca836a39ae9755d9
+
+Processing: noise_texture_256x256_rgba.raw.lz4
+  Tool: lz4
+  Compressed size: 262163 bytes
+  Decompressed to: noise_texture_256x256_rgba.raw_from_lz4.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: noise_texture_256x256_rgba.raw.gz
+  Tool: gz
+  Compressed size: 262244 bytes
+  Decompressed to: noise_texture_256x256_rgba.raw_from_gz.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: noise_texture_256x256_rgba.raw.bz2
+  Tool: bz2
+  Compressed size: 262149 bytes
+  Decompressed to: noise_texture_256x256_rgba.raw_from_bz2.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: noise_texture_256x256_rgba.raw.xz
+  Tool: xz
+  Compressed size: 265777 bytes
+  Decompressed to: noise_texture_256x256_rgba.raw_from_xz.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+Processing: noise_texture_256x256_rgba.raw.zst
+  Tool: zst
+  Compressed size: 262159 bytes
+  Decompressed to: noise_texture_256x256_rgba.raw_from_zst.txt
+  Decompressed size: 262144 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

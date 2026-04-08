@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\game_settings.ini
+Original hash: 7b25e8646a462d036e3e5c04b7877fafc797839886f4e86bea1dfd9596ac8848
+
+Processing: game_save_slot1.sav.lz4
+  Tool: lz4
+  Compressed size: 18672 bytes
+  Decompressed to: game_save_slot1.sav_from_lz4.txt
+  Decompressed size: 20246 bytes
+  Hash match: NO - FAILED
+
+Processing: game_save_slot1.sav.gz
+  Tool: gz
+  Compressed size: 12104 bytes
+  Decompressed to: game_save_slot1.sav_from_gz.txt
+  Decompressed size: 20246 bytes
+  Hash match: NO - FAILED
+
+Processing: game_save_slot1.sav.bz2
+  Tool: bz2
+  Compressed size: 11049 bytes
+  Decompressed to: game_save_slot1.sav_from_bz2.txt
+  Decompressed size: 20246 bytes
+  Hash match: NO - FAILED
+
+Processing: game_save_slot1.sav.xz
+  Tool: xz
+  Compressed size: 11401 bytes
+  Decompressed to: game_save_slot1.sav_from_xz.txt
+  Decompressed size: 20246 bytes
+  Hash match: NO - FAILED
+
+Processing: game_save_slot1.sav.zst
+  Tool: zst
+  Compressed size: 12124 bytes
+  Decompressed to: game_save_slot1.sav_from_zst.txt
+  Decompressed size: 20246 bytes
+  Hash match: NO - FAILED
+
+=== SUMMARY ===
+Total: 5
+Successful: 0
+Failed: 5

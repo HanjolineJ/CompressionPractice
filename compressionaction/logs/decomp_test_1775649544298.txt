@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\game_settings.ini
+Original hash: 7b25e8646a462d036e3e5c04b7877fafc797839886f4e86bea1dfd9596ac8848
+
+Processing: game_settings.ini.lz4
+  Tool: lz4
+  Compressed size: 540 bytes
+  Decompressed to: game_settings.ini_from_lz4.txt
+  Decompressed size: 549 bytes
+  Hash match: YES - USABLE
+
+Processing: game_settings.ini.gz
+  Tool: gz
+  Compressed size: 393 bytes
+  Decompressed to: game_settings.ini_from_gz.txt
+  Decompressed size: 549 bytes
+  Hash match: YES - USABLE
+
+Processing: game_settings.ini.bz2
+  Tool: bz2
+  Compressed size: 326 bytes
+  Decompressed to: game_settings.ini_from_bz2.txt
+  Decompressed size: 549 bytes
+  Hash match: YES - USABLE
+
+Processing: game_settings.ini.xz
+  Tool: xz
+  Compressed size: 419 bytes
+  Decompressed to: game_settings.ini_from_xz.txt
+  Decompressed size: 549 bytes
+  Hash match: YES - USABLE
+
+Processing: game_settings.ini.zst
+  Tool: zst
+  Compressed size: 394 bytes
+  Decompressed to: game_settings.ini_from_zst.txt
+  Decompressed size: 549 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

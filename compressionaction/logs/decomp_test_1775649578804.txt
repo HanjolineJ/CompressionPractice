@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\tiny_config.json
+Original hash: 848bc262453c52015737cede5f1f951dee391fe63235a3d6b551a8a5f794b917
+
+Processing: tiny_config.json.lz4
+  Tool: lz4
+  Compressed size: 561 bytes
+  Decompressed to: tiny_config.json_from_lz4.txt
+  Decompressed size: 761 bytes
+  Hash match: YES - USABLE
+
+Processing: tiny_config.json.gz
+  Tool: gz
+  Compressed size: 391 bytes
+  Decompressed to: tiny_config.json_from_gz.txt
+  Decompressed size: 761 bytes
+  Hash match: YES - USABLE
+
+Processing: tiny_config.json.bz2
+  Tool: bz2
+  Compressed size: 330 bytes
+  Decompressed to: tiny_config.json_from_bz2.txt
+  Decompressed size: 761 bytes
+  Hash match: YES - USABLE
+
+Processing: tiny_config.json.xz
+  Tool: xz
+  Compressed size: 398 bytes
+  Decompressed to: tiny_config.json_from_xz.txt
+  Decompressed size: 761 bytes
+  Hash match: YES - USABLE
+
+Processing: tiny_config.json.zst
+  Tool: zst
+  Compressed size: 394 bytes
+  Decompressed to: tiny_config.json_from_zst.txt
+  Decompressed size: 761 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0
