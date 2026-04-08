@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\level_map_data.xml
+Original hash: 7e1e0c4dd304980ccf20d80cfdd771c932780ae61546d36a85e79fe1afd89adc
+
+Processing: level_map_data.xml.lz4
+  Tool: lz4
+  Compressed size: 8863 bytes
+  Decompressed to: level_map_data.xml_from_lz4.txt
+  Decompressed size: 28751 bytes
+  Hash match: YES - USABLE
+
+Processing: level_map_data.xml.gz
+  Tool: gz
+  Compressed size: 3936 bytes
+  Decompressed to: level_map_data.xml_from_gz.txt
+  Decompressed size: 28751 bytes
+  Hash match: YES - USABLE
+
+Processing: level_map_data.xml.bz2
+  Tool: bz2
+  Compressed size: 3271 bytes
+  Decompressed to: level_map_data.xml_from_bz2.txt
+  Decompressed size: 28751 bytes
+  Hash match: YES - USABLE
+
+Processing: level_map_data.xml.xz
+  Tool: xz
+  Compressed size: 3393 bytes
+  Decompressed to: level_map_data.xml_from_xz.txt
+  Decompressed size: 28751 bytes
+  Hash match: YES - USABLE
+
+Processing: level_map_data.xml.zst
+  Tool: zst
+  Compressed size: 3670 bytes
+  Decompressed to: level_map_data.xml_from_zst.txt
+  Decompressed size: 28751 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

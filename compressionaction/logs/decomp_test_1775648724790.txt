@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\synthetic\pbr_fragment.glsl
+Original hash: f317ffdbb1301c1b70a7daf9babd4f82feb1827f1464b142ab70a476d99c624a
+
+Processing: pbr_fragment.glsl.lz4
+  Tool: lz4
+  Compressed size: 2578 bytes
+  Decompressed to: pbr_fragment.glsl_from_lz4.txt
+  Decompressed size: 24700 bytes
+  Hash match: YES - USABLE
+
+Processing: pbr_fragment.glsl.gz
+  Tool: gz
+  Compressed size: 1775 bytes
+  Decompressed to: pbr_fragment.glsl_from_gz.txt
+  Decompressed size: 24700 bytes
+  Hash match: YES - USABLE
+
+Processing: pbr_fragment.glsl.bz2
+  Tool: bz2
+  Compressed size: 1464 bytes
+  Decompressed to: pbr_fragment.glsl_from_bz2.txt
+  Decompressed size: 24700 bytes
+  Hash match: YES - USABLE
+
+Processing: pbr_fragment.glsl.xz
+  Tool: xz
+  Compressed size: 1626 bytes
+  Decompressed to: pbr_fragment.glsl_from_xz.txt
+  Decompressed size: 24700 bytes
+  Hash match: YES - USABLE
+
+Processing: pbr_fragment.glsl.zst
+  Tool: zst
+  Compressed size: 1559 bytes
+  Decompressed to: pbr_fragment.glsl_from_zst.txt
+  Decompressed size: 24700 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

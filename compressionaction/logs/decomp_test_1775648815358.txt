@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\freedm-0.13.0\CREDITS.txt
+Original hash: 72364333d295c598d75ef9553d3b3661ad0b60e27271c87b7637c74b2f46918a
+
+Processing: CREDITS.txt.lz4
+  Tool: lz4
+  Compressed size: 9387 bytes
+  Decompressed to: CREDITS.txt_from_lz4.txt
+  Decompressed size: 15872 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS.txt.gz
+  Tool: gz
+  Compressed size: 6084 bytes
+  Decompressed to: CREDITS.txt_from_gz.txt
+  Decompressed size: 15872 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS.txt.bz2
+  Tool: bz2
+  Compressed size: 5529 bytes
+  Decompressed to: CREDITS.txt_from_bz2.txt
+  Decompressed size: 15872 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS.txt.xz
+  Tool: xz
+  Compressed size: 5964 bytes
+  Decompressed to: CREDITS.txt_from_xz.txt
+  Decompressed size: 15872 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS.txt.zst
+  Tool: zst
+  Compressed size: 5967 bytes
+  Decompressed to: CREDITS.txt_from_zst.txt
+  Decompressed size: 15872 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0

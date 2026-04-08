@@ -1,0 +1,44 @@
+=== DECOMPRESSION TEST RESULTS ===
+
+Original file: C:\Users\Hanjo\OneDrive\StorageCompression\CompressionPractice\DataToTest\freedm-0.13.0\CREDITS-MUSIC.txt
+Original hash: 2bb77677bbc4e587bba44ccb6514ee0f5397c7bb8ae9580b9188d3d6a57c0a31
+
+Processing: CREDITS-MUSIC.txt.lz4
+  Tool: lz4
+  Compressed size: 4558 bytes
+  Decompressed to: CREDITS-MUSIC.txt_from_lz4.txt
+  Decompressed size: 9388 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS-MUSIC.txt.gz
+  Tool: gz
+  Compressed size: 2959 bytes
+  Decompressed to: CREDITS-MUSIC.txt_from_gz.txt
+  Decompressed size: 9388 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS-MUSIC.txt.bz2
+  Tool: bz2
+  Compressed size: 2531 bytes
+  Decompressed to: CREDITS-MUSIC.txt_from_bz2.txt
+  Decompressed size: 9388 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS-MUSIC.txt.xz
+  Tool: xz
+  Compressed size: 2820 bytes
+  Decompressed to: CREDITS-MUSIC.txt_from_xz.txt
+  Decompressed size: 9388 bytes
+  Hash match: YES - USABLE
+
+Processing: CREDITS-MUSIC.txt.zst
+  Tool: zst
+  Compressed size: 2905 bytes
+  Decompressed to: CREDITS-MUSIC.txt_from_zst.txt
+  Decompressed size: 9388 bytes
+  Hash match: YES - USABLE
+
+=== SUMMARY ===
+Total: 5
+Successful: 5
+Failed: 0
