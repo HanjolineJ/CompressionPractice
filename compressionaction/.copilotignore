@@ -1,0 +1,37 @@
+# Priority 1 — Fix Model Quality: Expand File Type Coverage
+
+## Problem
+Benchmark corpus is biased toward compressible data → lz4 gets 0 wins artificially.
+
+## Fix
+Run all 5 algorithms against pre-compressed and game file types that cover the full entropy range.
+
+| Type | Entropy | Expected winner |
+|------|---------|-----------------|
+| `.png` / `.jpg` | ≈ 8.0 | lz4 (speed, near-zero ratio gain) |
+| `.zip` / `.pk3` | ≈ 8.0 | lz4 (fast pass-through) |
+| `.wad` (large) | mixed | zstd (ratio on raw texture/audio lumps) |
+
+**Start with files already in the repo: `freedoom.wad` and the Crispy Doom binary.** If lz4 still has 0 wins after those, the scoring function is the bug — not the corpus.
+
+## Scoring
+Don't score on ratio alone. lz4 wins via speed on high-entropy input:
+
+```python
+def score(compressed_size, original_size, elapsed_ms):
+    ratio = compressed_size / original_size  # lower = better
+    speed = 1 / (elapsed_ms + 1e-9)
+    return 0.4 * (1 - ratio) + 0.6 * speed  # tune weights to use case
+```
+
+## Assertions
+After the benchmark run, assert win distribution is non-degenerate:
+- lz4 must have ≥ 1 win on files with entropy > 7.5
+- zstd must have ≥ 1 win on `.wad` files
+
+## Done When
+- [ ] Corpus covers `.png`, `.jpg`, `.zip`, `.pk3`, `.wad`
+- [ ] `freedoom.wad` + Crispy Doom binary included
+- [ ] All 5 algorithms × all files (full cartesian run)
+- [ ] Per-file-type win distribution logged
+- [ ] lz4 ≥ 1 win, zstd ≥ 1 WAD win
