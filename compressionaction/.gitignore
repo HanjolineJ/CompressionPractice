@@ -1,3 +1,61 @@
+# =============================================================================
+# CompressionPractice — root .gitignore
+# =============================================================================
+
+# ── Node / Electron ───────────────────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+
+# ── Compression output directories ───────────────────────────────────────────
+# These are fully reproducible by running the app or script.py — no need to
+# version-control hundreds of MB of compressed files.
+out_test/
+compressionaction/out_test/
+.venv/
+
+# ── Decompression view dumps (very large, regenerated on demand) ──────────────
+out_test/view_decomp/
+compressionaction/view_decomp/
+DataToTest/view_decomp/
+
+# ── Extracted game data (reproducible from the .zip files already in repo) ───
+DataToTest/freedm-0.13.0/
+DataToTest/freedoom-0.13.0/
+
+# ── R artefacts ──────────────────────────────────────────────────────────────
+# Rplots.pdf is created silently by R when running non-interactively.
+Rplots.pdf
+MLFirstTry/Rplots.pdf
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# ── macOS / editor noise ──────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+
+# ── Electron build output ─────────────────────────────────────────────────────
+compressionaction/dist/
+compressionaction/dist-electron/
+compressionaction/release/
+
+# ── GitHub Copilot instructions (already in compressionaction/.gitignore) ─────
+.github/copilot-instructions.md
+
+
+
 node_modules
 
 # Hide Copilot instructions from git

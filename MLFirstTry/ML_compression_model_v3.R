@@ -466,6 +466,39 @@ rf_preds <- factor(predict(rf_model, newdata = test_data),
 rf_cm    <- confusionMatrix(rf_preds, actuals)
 rf_acc   <- rf_cm$overall["Accuracy"]
 
+# ── CV Resample Report (the defensible number for any paper) ─────────────────
+# rf_model$pred contains one row per held-out sample across all folds because
+# savePredictions = "final" is set in trainControl above.
+# We compute macro-F1 per fold so the paper can report "mean ± SD".
+cat("--- Cross-Validation Results (", n_folds, "-fold) ---\n", sep = "")
+
+cv_preds_df <- rf_model$pred
+cv_macro_f1_mean <- NA_real_
+cv_macro_f1_sd   <- NA_real_
+
+if (!is.null(cv_preds_df) && nrow(cv_preds_df) > 0) {
+  cv_f1_per_fold <- sapply(sort(unique(cv_preds_df$Resample)), function(fold) {
+    fold_df   <- cv_preds_df[cv_preds_df$Resample == fold, ]
+    fold_obs  <- factor(fold_df$obs,  levels = all_target_levels)
+    fold_pred <- factor(fold_df$pred, levels = all_target_levels)
+    cm        <- confusionMatrix(fold_pred, fold_obs)
+    pc        <- cm$byClass
+    if (is.null(dim(pc))) pc <- t(as.matrix(pc))
+    mean(pc[, "F1"], na.rm = TRUE)
+  })
+  cv_macro_f1_mean <- mean(cv_f1_per_fold, na.rm = TRUE)
+  cv_macro_f1_sd   <- sd(cv_f1_per_fold,   na.rm = TRUE)
+  cat(sprintf("  CV macro-F1 per fold : %s\n",
+              paste(round(cv_f1_per_fold, 3), collapse = ", ")))
+  cat(sprintf("  CV macro-F1 mean ± SD: %.3f ± %.3f\n",
+              cv_macro_f1_mean, cv_macro_f1_sd))
+  cat(sprintf("  >>> Report in paper as: macro-F1 = %.3f +/- %.3f (%d-fold CV) <<<\n\n",
+              cv_macro_f1_mean, cv_macro_f1_sd, n_folds))
+} else {
+  cat("  (CV fold predictions unavailable — savePredictions may not have been 'final')\n\n")
+}
+
+cat("--- Holdout Test Set Evaluation ---\n")
 cat("Random Forest Accuracy:", sprintf("%.1f%%", rf_acc * 100), "\n\n")
 cat("--- Full Confusion Matrix (Random Forest) ---\n")
 print(rf_cm)
@@ -501,10 +534,14 @@ cat(sprintf("\nMacro-averaged F1      : %.3f\n", macro_f1))
 cat(sprintf("Overall balanced accuracy: %.3f\n\n", bal_acc))
 
 cat("--- Model Comparison ---\n")
+cv_label <- if (!is.na(cv_macro_f1_mean)) {
+  sprintf("%.3f +/- %.3f (%d-fold)", cv_macro_f1_mean, cv_macro_f1_sd, n_folds)
+} else { "—" }
 data.frame(
   Model          = c("Decision Tree (baseline)", "Random Forest (primary)"),
-  Accuracy       = c(sprintf("%.1f%%", dt_acc * 100), sprintf("%.1f%%", rf_acc * 100)),
-  Macro_F1       = c("—", sprintf("%.3f", macro_f1)),
+  Holdout_Acc    = c(sprintf("%.1f%%", dt_acc * 100), sprintf("%.1f%%", rf_acc * 100)),
+  Holdout_MacroF1= c("—", sprintf("%.3f", macro_f1)),
+  CV_MacroF1     = c("—", cv_label),
   Balanced_Acc   = c("—", sprintf("%.3f", bal_acc))
 ) |> print(row.names = FALSE)
 cat("\n")
@@ -532,7 +569,12 @@ saveRDS(list(
   file_ext_lvls   = unique(c(levels(train_data$file_ext), "unknown")),
   algo_lvls       = all_target_levels,
   macro_f1        = macro_f1,
-  balanced_acc    = bal_acc
+  balanced_acc    = bal_acc,
+  cv_macro_f1_mean = cv_macro_f1_mean,   # mean CV macro-F1 across folds
+  cv_macro_f1_sd   = cv_macro_f1_sd,     # SD — report as mean ± SD in paper
+  n_folds          = n_folds,
+  n_train          = nrow(train_data),
+  n_test           = nrow(test_data)
 ), MODEL_RDS_PATH)
 cat("Model saved to:", MODEL_RDS_PATH, "\n\n")
 

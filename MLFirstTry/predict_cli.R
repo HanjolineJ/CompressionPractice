@@ -98,6 +98,18 @@ if (is.null(bundle) || is.null(bundle$rf_model)) {
   emit_error("Failed to load rf_model_v3.rds — the file may be corrupt or from an older version.")
 }
 
+# ── Diagnostic: print model metadata to stderr (Node reads stdout only) ───────
+message("=== rf_model_v3.rds diagnostic ===")
+message("  model_features  : ", paste(bundle$model_features %||% "(none)", collapse = ", "))
+message("  shannon_entropy : ", if ("shannon_entropy" %in% (bundle$model_features %||% "")) "YES - in model" else "NO  - missing from model features")
+message("  n_train/n_test  : ", bundle$n_train %||% "?", " / ", bundle$n_test %||% "?")
+message("  CV macro-F1     : ", if (!is.null(bundle$cv_macro_f1_mean) && !is.na(bundle$cv_macro_f1_mean))
+  sprintf("%.3f +/- %.3f (%d-fold)", bundle$cv_macro_f1_mean, bundle$cv_macro_f1_sd, bundle$n_folds)
+  else "(not recorded — retrain with ML_compression_model_v3.R)")
+message("  holdout macro-F1: ", if (!is.null(bundle$macro_f1)) round(bundle$macro_f1, 3) else "?")
+message("  balanced acc    : ", if (!is.null(bundle$balanced_acc)) round(bundle$balanced_acc, 3) else "?")
+message("===================================")
+
 # ── 3. Build the observation data frame ──────────────────────────────────────
 SIZE_TIER_LEVELS <- c("tiny", "small", "medium", "large")
 CONF_THRESHOLD   <- 0.40

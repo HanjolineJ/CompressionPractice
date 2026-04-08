@@ -1,0 +1,41 @@
+{
+  "version": "1.4.2",
+  "window": {
+    "width": 1920,
+    "height": 1080,
+    "fullscreen": false,
+    "vsync": true
+  },
+  "audio": {
+    "master_volume": 0.8,
+    "sfx_volume": 0.7,
+    "music_volume": 0.5,
+    "muted": false
+  },
+  "graphics": {
+    "quality": "high",
+    "shadows": true,
+    "anti_aliasing": "MSAA4x",
+    "texture_quality": "ultra",
+    "draw_distance": 1000
+  },
+  "controls": {
+    "mouse_sensitivity": 0.6,
+    "invert_y": false,
+    "key_forward": "W",
+    "key_back": "S",
+    "key_left": "A",
+    "key_right": "D",
+    "key_jump": "Space"
+  },
+  "gameplay": {
+    "difficulty": "normal",
+    "auto_save": true,
+    "tutorial": false
+  },
+  "network": {
+    "server": "play.example.com",
+    "port": 25565,
+    "timeout": 30
+  }
+}

@@ -42,6 +42,80 @@ function computeEntropy(filePath, sampleBytes = 65536) {
   }
 }
 
+// ── Magic-number / file-header detection ─────────────────────────────────────
+// Reads the first 8 bytes and maps them to a content-type category.
+// This is the single strongest predictor of best compression algorithm:
+//   already_compressed → lz4 (general-purpose compressors can't help)
+//   image_raw          → lz4 (pixel data has moderate entropy)
+//   text / structured  → bzip2 / xz / zstd
+//   binary / unknown   → zstd (safe default)
+//
+// The returned category is sent to R as `magic_type` and also used to
+// set a `is_precompressed` boolean flag that suppresses low-confidence
+// recommendations for already-compressed files.
+function detectMagicType(filePath) {
+  try {
+    const fd  = fs.openSync(filePath, 'r');
+    const buf = Buffer.alloc(8);
+    const bytesRead = fs.readSync(fd, buf, 0, 8, 0);
+    fs.closeSync(fd);
+    if (bytesRead < 2) return { magic_type: 'unknown', is_precompressed: false };
+
+    const b = buf;
+
+    // ── Already-compressed formats ──────────────────────────────────────────
+    // These have entropy near 8.0 — general compressors make them LARGER.
+    if (b[0] === 0x50 && b[1] === 0x4B)                          return { magic_type: 'already_compressed', is_precompressed: true };  // ZIP / JAR / DOCX / XLSX
+    if (b[0] === 0x1F && b[1] === 0x8B)                          return { magic_type: 'already_compressed', is_precompressed: true };  // GZIP
+    if (b[0] === 0x42 && b[1] === 0x5A && b[2] === 0x68)         return { magic_type: 'already_compressed', is_precompressed: true };  // BZ2
+    if (b[0] === 0xFD && b[1] === 0x37 && b[2] === 0x7A)         return { magic_type: 'already_compressed', is_precompressed: true };  // XZ
+    if (b[0] === 0x28 && b[1] === 0xB5 && b[2] === 0x2F && b[3] === 0xFD) return { magic_type: 'already_compressed', is_precompressed: true };  // ZSTD
+    if (b[0] === 0x04 && b[1] === 0x22 && b[2] === 0x4D && b[3] === 0x18) return { magic_type: 'already_compressed', is_precompressed: true };  // LZ4 frame
+    if (b[0] === 0x37 && b[1] === 0x7A && b[2] === 0xBC && b[3] === 0xAF) return { magic_type: 'already_compressed', is_precompressed: true };  // 7-ZIP
+    if (b[0] === 0x52 && b[1] === 0x61 && b[2] === 0x72 && b[3] === 0x21) return { magic_type: 'already_compressed', is_precompressed: true };  // RAR
+
+    // ── Lossy-compressed image formats (JPEG) ────────────────────────────────
+    if (b[0] === 0xFF && b[1] === 0xD8)                           return { magic_type: 'already_compressed', is_precompressed: true };  // JPEG
+
+    // ── Lossless / raw image formats (can compress a little) ────────────────
+    if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return { magic_type: 'image_raw', is_precompressed: false };  // PNG
+    if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46)         return { magic_type: 'image_raw', is_precompressed: false };  // GIF
+    if (b[0] === 0x42 && b[1] === 0x4D)                          return { magic_type: 'image_raw', is_precompressed: false };  // BMP
+    if (b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2A)         return { magic_type: 'image_raw', is_precompressed: false };  // TIFF LE
+    if (b[0] === 0x4D && b[1] === 0x4D && b[2] === 0x00 && b[3] === 0x2A) return { magic_type: 'image_raw', is_precompressed: false };  // TIFF BE
+
+    // ── Audio / video raw (moderate entropy) ────────────────────────────────
+    if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46) return { magic_type: 'audio_video', is_precompressed: false };  // RIFF (WAV/AVI)
+    if (b[0] === 0x4F && b[1] === 0x67 && b[2] === 0x67 && b[3] === 0x53) return { magic_type: 'already_compressed', is_precompressed: true };  // OGG
+
+    // ── Game-specific formats ────────────────────────────────────────────────
+    if (b[0] === 0x49 && b[1] === 0x57 && b[2] === 0x41 && b[3] === 0x44) return { magic_type: 'game_wad', is_precompressed: false };  // IWAD (Doom)
+    if (b[0] === 0x50 && b[1] === 0x57 && b[2] === 0x41 && b[3] === 0x44) return { magic_type: 'game_wad', is_precompressed: false };  // PWAD (Doom)
+
+    // ── Executables & shared libraries ──────────────────────────────────────
+    if (b[0] === 0x4D && b[1] === 0x5A)                          return { magic_type: 'executable', is_precompressed: false };  // PE (Windows .exe/.dll)
+    if (b[0] === 0x7F && b[1] === 0x45 && b[2] === 0x4C && b[3] === 0x46) return { magic_type: 'executable', is_precompressed: false };  // ELF (Linux)
+
+    // ── Structured text formats ──────────────────────────────────────────────
+    // UTF-8 BOM, XML declaration, JSON opening brace/bracket
+    if (b[0] === 0xEF && b[1] === 0xBB && b[2] === 0xBF)         return { magic_type: 'text_structured', is_precompressed: false };  // UTF-8 BOM
+    if (b[0] === 0x3C && b[1] === 0x3F && b[2] === 0x78 && b[3] === 0x6D) return { magic_type: 'text_structured', is_precompressed: false };  // <?xm (XML)
+    if (b[0] === 0x3C && (b[1] === 0x21 || b[1] === 0x68 || b[1] === 0x48)) return { magic_type: 'text_structured', is_precompressed: false };  // HTML
+    if (b[0] === 0x7B || b[0] === 0x5B)                          return { magic_type: 'text_structured', is_precompressed: false };  // JSON { or [
+
+    // ── Plain text (low entropy — best compression wins) ────────────────────
+    // Heuristic: if all 8 bytes are printable ASCII, treat as text
+    const allPrintable = Array.from(buf.slice(0, bytesRead)).every(c => c >= 0x09 && c <= 0x7E);
+    if (allPrintable)                                             return { magic_type: 'text_plain', is_precompressed: false };
+
+    // ── Fallback ─────────────────────────────────────────────────────────────
+    return { magic_type: 'binary_unknown', is_precompressed: false };
+
+  } catch {
+    return { magic_type: 'unknown', is_precompressed: false };
+  }
+}
+
 // ── Detect the R executable ───────────────────────────────────────────────────
 function findRscript() {
   // Ordered list of candidate locations
@@ -130,10 +204,13 @@ export async function getRecommendation(filePath) {
   const src_bytes = stat.size;
   const file_ext  = path.extname(filePath).replace('.', '').toLowerCase() || 'unknown';
   const entropy   = computeEntropy(filePath);
+  const { magic_type, is_precompressed } = detectMagicType(filePath);
 
   const fileStats = {
     src_bytes,
     file_ext,
+    magic_type,
+    is_precompressed,
     shannon_entropy: entropy,
     // These defaults match the model's training distribution.
     // They'll be overridden by real benchmark data once that is available.
@@ -144,6 +221,19 @@ export async function getRecommendation(filePath) {
     mean_decomp_ms: 10.0,
     mean_comp_ms:   5.0,
   };
+
+  // Short-circuit for already-compressed files: no compressor can help.
+  // Return a fast recommendation without calling R.
+  if (is_precompressed) {
+    return {
+      algorithm:  'lz4',
+      confidence: 0.95,
+      confident:  true,
+      scores:     { lz4: 0.95, zstd: 0.03, gzip: 0.01, bzip2: 0.005, xz: 0.005 },
+      fileStats,
+      note: `File appears already compressed (magic type: ${magic_type}). lz4 recommended to minimise overhead.`,
+    };
+  }
 
   try {
     const prediction = await callRPredictor(fileStats);
@@ -172,6 +262,7 @@ export async function getRecommendationFromBenchmark(filePath, benchmarkRows) {
   const src_bytes = stat.size;
   const file_ext  = path.extname(filePath).replace('.', '').toLowerCase() || 'unknown';
   const entropy   = computeEntropy(filePath);
+  const { magic_type, is_precompressed } = detectMagicType(filePath);
 
   // Extract per-algorithm savings from benchmark rows
   const verified  = benchmarkRows.filter(r => r.decompressVerified && !r.error && !r.skipped);
@@ -189,6 +280,8 @@ export async function getRecommendationFromBenchmark(filePath, benchmarkRows) {
   const fileStats = {
     src_bytes,
     file_ext,
+    magic_type,
+    is_precompressed,
     shannon_entropy:  entropy,
     mean_savings:     Math.round(mean(ratios)    * 1000) / 1000,
     min_savings:      Math.round(min(ratios)     * 1000) / 1000,
@@ -202,6 +295,18 @@ export async function getRecommendationFromBenchmark(filePath, benchmarkRows) {
     xz_savings:       savings['xz']    ?? mean(ratios),
     zstd_savings:     savings['zstd']  ?? mean(ratios),
   };
+
+  // Short-circuit for already-compressed files (same as getRecommendation).
+  if (is_precompressed) {
+    return {
+      algorithm:  'lz4',
+      confidence: 0.95,
+      confident:  true,
+      scores:     { lz4: 0.95, zstd: 0.03, gzip: 0.01, bzip2: 0.005, xz: 0.005 },
+      fileStats,
+      note: `File appears already compressed (magic type: ${magic_type}). lz4 recommended to minimise overhead.`,
+    };
+  }
 
   try {
     const prediction = await callRPredictor(fileStats);
